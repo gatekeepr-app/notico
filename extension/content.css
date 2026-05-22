@@ -1,0 +1,33 @@
+#notico-clipper-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #5e6ad2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(94, 106, 210, 0.35);
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+#notico-clipper-btn:hover {
+  background: #4c5ab5;
+  box-shadow: 0 6px 16px rgba(94, 106, 210, 0.45);
+  transform: translateY(-1px);
+}
+
+#notico-clipper-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+  transform: none;
+}

@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Notico Clipper",
+  "version": "1.1",
+  "description": "Clip web pages into Notico",
+  "permissions": ["storage", "sidePanel", "commands", "scripting"],
+  "host_permissions": ["http://localhost:5173/*", "https://*.convex.cloud/*"],
+  "action": {
+    "default_title": "Clip to Notico",
+    "default_icon": {
+      "16": "icon-16.png",
+      "48": "icon-48.png",
+      "128": "icon-128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "sidebar/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "clip-page": {
+      "suggested_key": { "default": "Ctrl+Shift+N", "mac": "Command+Shift+N" },
+      "description": "Clip current page to Notico"
+    }
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  }
+}
