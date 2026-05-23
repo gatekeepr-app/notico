@@ -94,7 +94,7 @@ export function AppLayout() {
   }, []);
 
   return (
-    <div className="flex h-dvh w-screen overflow-hidden bg-[var(--color-surface-subtle)]">
+    <div className="flex h-dvh w-full overflow-hidden bg-[var(--color-surface-subtle)]">
       <Sidebar
         open={sidebarOpen && !isMobile}
         mobileOpen={sidebarOpen && isMobile}

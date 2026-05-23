@@ -121,7 +121,7 @@ export function EditorPane({
 
   const editorContent = (
     <div className="flex flex-col h-full" onDrop={handleDrop} onDragOver={handleDragOver}>
-      <div className="flex items-center gap-2 px-4 md:px-5 pt-3 md:pt-4 pb-2">
+      <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-5 pt-2 md:pt-4 pb-1.5 md:pb-2">
         <PinButton pinned={pinned} onToggle={onTogglePin} />
         <input
           value={title}
@@ -144,19 +144,19 @@ export function EditorPane({
         </button>
         <button
           onClick={onToggleMode}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 md:py-1 text-[11px] font-medium transition-colors border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] shrink-0"
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 md:py-1 text-[11px] font-medium transition-colors border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] shrink-0"
           title={richText ? "Switch to source" : "Switch to rich text"}
         >
           {richText ? <Code size={12} /> : <FileType size={12} />}
           <span className="hidden sm:inline">{richText ? "Source" : "Rich"}</span>
         </button>
       </div>
-      <div className="px-4 md:px-5 pb-2 flex items-center gap-2">
+      <div className="px-3 md:px-5 pb-1.5 md:pb-2 flex items-center gap-2">
         <TagInput tags={tags} onChange={onTagsChange} suggestions={tagSuggestions} />
         <SaveIndicator state={saveState} />
       </div>
-      <div className="flex-1 overflow-hidden px-4 md:px-5 pb-3">
-        <div className="h-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] overflow-hidden flex flex-col">
+      <div className="flex-1 overflow-hidden px-3 md:px-5 pb-2 md:pb-3">
+        <div className="h-full rounded-lg md:rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] overflow-hidden flex flex-col">
           <div className="flex-1 overflow-hidden">
             {richText ? (
               <TiptapEditor content={html} onChange={onHtmlChange} />
@@ -167,7 +167,7 @@ export function EditorPane({
           <BacklinksPanel noteId={noteId} onSelectNote={onSelectNote} />
         </div>
       </div>
-      <div className="flex items-center justify-between px-4 md:px-5 py-1.5 border-t border-[var(--color-border-subtle)]">
+      <div className="flex items-center justify-between px-3 md:px-5 py-1 md:py-1.5 border-t border-[var(--color-border-subtle)]">
         <span className="text-[11px] text-[var(--color-text-tertiary)]">
           {wordCount} {wordCount === 1 ? "word" : "words"}
         </span>

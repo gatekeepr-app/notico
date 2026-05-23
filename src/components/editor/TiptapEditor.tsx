@@ -46,7 +46,7 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none px-4 md:px-5 py-3 md:py-4 min-h-full",
+        class: "prose prose-sm max-w-none focus:outline-none px-3 md:px-5 py-2 md:py-4 min-h-full",
       },
       handlePaste: (view, event) => {
         const items = event.clipboardData?.items;

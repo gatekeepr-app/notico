@@ -129,14 +129,14 @@ export function SlashMenu({ editor }: SlashMenuProps) {
   }, [query]);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    const handler = (e: PointerEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
     if (open) {
-      document.addEventListener("mousedown", handler);
-      return () => document.removeEventListener("mousedown", handler);
+      document.addEventListener("pointerdown", handler);
+      return () => document.removeEventListener("pointerdown", handler);
     }
   }, [open]);
 
@@ -156,8 +156,8 @@ export function SlashMenu({ editor }: SlashMenuProps) {
         return (
           <button
             key={cmd.id}
-            onMouseDown={(e) => { e.preventDefault(); execute(cmd); }}
-            onMouseEnter={() => setSelectedIdx(i)}
+            onPointerDown={(e) => { e.preventDefault(); execute(cmd); }}
+            onPointerEnter={() => setSelectedIdx(i)}
             className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left transition-colors ${
               i === selectedIdx
                 ? "bg-[var(--color-accent-light)] text-[var(--color-accent)]"

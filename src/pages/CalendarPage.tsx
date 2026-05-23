@@ -55,7 +55,7 @@ export function CalendarPage({ onSelectNote }: CalendarPageProps) {
 
   return (
     <div className="h-full overflow-y-auto">
-      <div className="max-w-2xl mx-auto p-3 md:p-6">
+      <div className="md:max-w-2xl md:mx-auto p-2 md:p-6">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg md:text-xl font-semibold text-[var(--color-text)]">
             {MONTHS[month]} {year}
