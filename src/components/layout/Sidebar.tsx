@@ -163,7 +163,7 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
         <div className="fixed inset-0 z-30 md:hidden" onClick={onClose}>
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
           <aside
-            className="relative w-80 max-w-[85vw] h-full bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col animate-in slide-in-from-left"
+            className="relative w-80 max-w-[85vw] h-full bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col sidebar-slide-in"
             onClick={(e) => e.stopPropagation()}
           >
             {content}

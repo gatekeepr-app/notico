@@ -90,6 +90,29 @@ export function AppLayout() {
     setView("notes");
   }, []);
 
+  useEffect(() => {
+    if (!isMobile || view !== "editor") return;
+    let startX = 0;
+    let startY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = Math.abs(e.changedTouches[0].clientY - startY);
+      if (dx > 80 && dy < 60 && startX < 40) {
+        goBack();
+      }
+    };
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isMobile, view, goBack]);
+
   const handleQuickAdd = useCallback(async () => {
     if (!token) return;
     const id = await createNote({ title: "Untitled", token });

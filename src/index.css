@@ -89,3 +89,12 @@ body {
 .pane-divider:active {
   background: var(--color-accent);
 }
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.sidebar-slide-in {
+  animation: slide-in-left 0.2s ease-out;
+}

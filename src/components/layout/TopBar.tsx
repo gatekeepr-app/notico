@@ -40,7 +40,7 @@ export function TopBar({
             className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
           >
             <ChevronLeft size={16} />
-            <span className="hidden sm:inline">Back</span>
+            <span>Back</span>
           </button>
         )}
       </div>

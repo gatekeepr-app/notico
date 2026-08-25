@@ -16,7 +16,7 @@ export function MobileNav({ view, onViewChange }: MobileNavProps) {
   ];
 
   return (
-    <nav className="md:hidden flex items-center justify-around h-14 bg-[var(--color-surface)] border-t border-[var(--color-border)] pb-[var(--safe-area-bottom)] shrink-0">
+    <nav className="md:hidden flex items-center justify-around h-14 bg-[var(--color-surface)] border-t border-[var(--color-border)] shrink-0" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       {items.map(({ id, label, icon: Icon }) => (
         <button
           key={id}
