@@ -19,10 +19,11 @@
 - [x] Extension React sidebar — Vite + React + Tailwind build
 - [x] Responsive shell — safe areas, swipe back, mobile sidebar animation
 - [x] PWA hardening — offline fallback, Google Fonts caching, manifest id
+- [x] User settings — account info, theme toggle, data export
 
 ## In Progress
 
-- [ ] 2.5 User settings — per-user prefs, theme sync, data export
+- [ ] 1.2 Extension quick add — tag picker, folder selector
 
 ## Next
 
@@ -39,7 +40,7 @@
 - [x] **2.2** Landing page — complete
 - [x] **2.3** Responsive shell — breakpoints, mobile overlays, touch gestures
 - [x] **2.4** PWA hardening — offline fallback, workbox, install prompt, push notifications
-- [ ] **2.5** User settings — per-user preferences, data export, theme sync
+- [x] **2.5** User settings — per-user preferences, data export, theme sync
 
 ## Backlog
 
