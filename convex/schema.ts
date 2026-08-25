@@ -38,7 +38,7 @@ export default defineSchema({
     .index("by_folder", ["folderId"])
     .index("by_updated", ["updatedAt"])
     .index("by_user", ["userId"])
-    .searchIndex("search_content", { searchField: "content", filterFields: ["folderId"] }),
+    .searchIndex("search_content", { searchField: "content", filterFields: ["folderId", "userId"] }),
 
   folders: defineTable({
     name: v.string(),

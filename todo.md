@@ -15,11 +15,11 @@
 - [x] Dark mode support
 - [x] PWA icons (192, 512)
 - [x] Quick switcher (Cmd+K)
+- [x] Auth hardening — folders user-scoped, search index userId filter
 
 ## In Progress
 
 - [ ] Extension React sidebar rebuild (Step 1.1)
-- [ ] Auth — user-scoped notes (Step 2.1)
 
 ## Next
 
@@ -32,8 +32,8 @@
 
 ### Phase 2: PWA / Website
 
-- [ ] **2.1** Auth hardening — user-scoped queries, Convex Auth integration
-- [ ] **2.2** Landing page polish — responsive, social proof, footer
+- [x] **2.1** Auth hardening — user-scoped queries
+- [x] **2.2** Landing page — complete
 - [ ] **2.3** Responsive shell — breakpoints, mobile overlays, touch gestures
 - [ ] **2.4** PWA hardening — offline fallback, workbox, install prompt, push notifications
 - [ ] **2.5** User settings — per-user preferences, data export, theme sync

@@ -34,7 +34,7 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
   const isTagged = activeTag !== null;
   const displayNotes = isTagged ? (taggedNotes ?? []) : (allNotes ?? []);
   const tags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
-  const folders = useQuery(api.folders.list, {});
+  const folders = useQuery(api.folders.list, token ? { token } : "skip");
   const createNote = useMutation(api.notes.create);
   const createFolder = useMutation(api.folders.create);
 
@@ -45,9 +45,10 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
   };
 
   const handleNewFolder = async () => {
+    if (!token) return;
     const name = prompt("Folder name:");
     if (name?.trim()) {
-      await createFolder({ name: name.trim() });
+      await createFolder({ name: name.trim(), token });
     }
   };
 

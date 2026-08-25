@@ -133,11 +133,11 @@ export const search = query({
     const now = Date.now();
     return await ctx.db
       .query("notes")
-      .withSearchIndex("search_content", (q) => q.search("content", args.query))
+      .withSearchIndex("search_content", (q) =>
+        q.search("content", args.query).eq("userId", session.userId)
+      )
       .take(20)
-      .then((notes) =>
-        notes.filter((n) => n.userId === session.userId && (!n.expiresAt || n.expiresAt > now))
-      );
+      .then((notes) => notes.filter((n) => !n.expiresAt || n.expiresAt > now));
   },
 });
 

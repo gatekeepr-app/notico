@@ -75,7 +75,7 @@ export function LandingPage() {
           </h1>
           <p className="mt-5 text-base sm:text-lg text-[var(--color-text-secondary)] max-w-xl mx-auto leading-relaxed">
             Paste anything from your browser. Notes live for 10 minutes, then vanish.
-            Perfect for quick captures you don't need toorganize.
+            Perfect for quick captures you don't need to organize.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
