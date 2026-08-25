@@ -19,12 +19,3 @@ export function formatDate(ts: number): string {
   if (days < 7) return `${days} days ago`;
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
-
-export function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .trim() || "untitled";
-}

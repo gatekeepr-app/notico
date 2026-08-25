@@ -15,8 +15,7 @@ export function SearchOverlay({ onClose, onSelectNote }: SearchOverlayProps) {
   const { token } = useAuth();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const allNotes = useQuery(api.notes.list, token ? { token } : "skip") ?? [];
-  const searchResults = useQuery(api.notes.search, token ? { query, token } : "skip") ?? [];
+  const results = useQuery(api.notes.search, token && query.trim() ? { query, token } : "skip") ?? [];
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -31,21 +30,6 @@ export function SearchOverlay({ onClose, onSelectNote }: SearchOverlayProps) {
   }, [onClose]);
 
   const queryLower = query.toLowerCase().trim();
-
-  const combinedResults = queryLower
-    ? [
-        ...searchResults.filter((n: any) =>
-          n.title?.toLowerCase().includes(queryLower) || n.content?.toLowerCase().includes(queryLower)
-        ),
-        ...allNotes.filter((n: any) => {
-          if (searchResults.some((r: any) => r._id === n._id)) return false;
-          return (
-            n.title?.toLowerCase().includes(queryLower) ||
-            n.tags?.some((t: string) => t.toLowerCase().includes(queryLower))
-          );
-        }),
-      ].slice(0, 20)
-    : [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/20 backdrop-blur-sm">
@@ -69,13 +53,13 @@ export function SearchOverlay({ onClose, onSelectNote }: SearchOverlayProps) {
           </button>
         </div>
         <div className="max-h-80 overflow-y-auto p-1">
-          {queryLower && combinedResults.length === 0 && (
+          {queryLower && results.length === 0 && (
             <div className="py-8 text-center">
               <Search size={24} className="mx-auto mb-2 text-[var(--color-text-tertiary)]" />
               <p className="text-xs text-[var(--color-text-tertiary)]">No results found for "{query}"</p>
             </div>
           )}
-          {combinedResults.map((note: any) => {
+          {results.slice(0, 20).map((note: any) => {
             const matchInContent = queryLower && note.content?.toLowerCase().includes(queryLower);
             const contentPreview = note.content?.slice(0, 120) || "";
             const matchIdx = contentPreview.toLowerCase().indexOf(queryLower);

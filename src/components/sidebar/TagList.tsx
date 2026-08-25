@@ -1,16 +1,12 @@
-import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
-import { useAuth } from "../auth/AuthProvider";
 import { Tag } from "lucide-react";
 
 interface TagListProps {
+  tags: { name: string; count: number }[];
   activeTag: string | null;
   onSelectTag: (tag: string | null) => void;
 }
 
-export function TagList({ activeTag, onSelectTag }: TagListProps) {
-  const { token } = useAuth();
-  const tags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
+export function TagList({ tags, activeTag, onSelectTag }: TagListProps) {
 
   return (
     <div className="space-y-0.5">

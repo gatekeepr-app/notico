@@ -172,7 +172,7 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
               <Hash size={11} />
               Tags
             </div>
-            <TagList activeTag={activeTag} onSelectTag={handleSelectTag} />
+            <TagList tags={tags} activeTag={activeTag} onSelectTag={handleSelectTag} />
           </div>
         )}
 
