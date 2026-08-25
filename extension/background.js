@@ -15,7 +15,8 @@ async function convexMutation(path, args) {
     const text = await res.text();
     throw new Error(`Convex returned ${res.status}: ${text.slice(0, 200)}`);
   }
-  return res.json();
+  const data = await res.json();
+  return data.value !== undefined ? data.value : data;
 }
 
 async function convexQuery(path, args) {
@@ -28,7 +29,8 @@ async function convexQuery(path, args) {
     const text = await res.text();
     throw new Error(`Convex returned ${res.status}: ${text.slice(0, 200)}`);
   }
-  return res.json();
+  const data = await res.json();
+  return data.value !== undefined ? data.value : data;
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -85,7 +87,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "PAIR_EXTENSION") {
     convexMutation("pairing:claim", { code: message.code })
       .then(async (result) => {
-        await chrome.storage.local.set({ authToken: result.token, paired: true });
+        const token = result.token;
+        await chrome.storage.local.set({ authToken: token, paired: true });
         sendResponse({ success: true });
       })
       .catch((err) => sendResponse({ success: false, error: err.message }));
