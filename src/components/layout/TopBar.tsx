@@ -24,23 +24,28 @@ export function TopBar({
   onToggleTheme,
   onProfile,
 }: TopBarProps) {
+  const isEditor = view === "editor" && activeNoteId;
+
   return (
-    <header className="flex items-center justify-between h-11 px-3 bg-[var(--color-surface)] border-b border-[var(--color-border-subtle)] shrink-0">
-      <div className="flex items-center gap-1">
-        <button
-          onClick={onToggleSidebar}
-          className="rounded-lg p-1.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
-          title="Toggle sidebar"
-        >
-          <Menu size={18} />
-        </button>
-        {view === "editor" && activeNoteId && (
+    <header
+      className="flex items-center justify-between h-12 px-3 bg-[var(--color-surface)] border-b border-[var(--color-border-subtle)] shrink-0"
+      style={{ paddingTop: "var(--safe-area-top)" }}
+    >
+      <div className="flex items-center gap-0.5">
+        {isEditor ? (
           <button
             onClick={onBack}
-            className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
+            className="flex items-center gap-0.5 -ml-1 rounded-lg px-2 py-1.5 text-[var(--color-accent)] transition-colors active:bg-[var(--color-surface-subtle)]"
           >
-            <ChevronLeft size={16} />
-            <span>Back</span>
+            <ChevronLeft size={20} strokeWidth={2.5} />
+            <span className="text-sm font-medium">Back</span>
+          </button>
+        ) : (
+          <button
+            onClick={onToggleSidebar}
+            className="rounded-lg p-2 text-[var(--color-text-secondary)] transition-colors active:bg-[var(--color-surface-subtle)]"
+          >
+            <Menu size={20} />
           </button>
         )}
       </div>
@@ -48,30 +53,27 @@ export function TopBar({
       <div className="flex items-center gap-0.5">
         <button
           onClick={onToggleTheme}
-          className="rounded-lg p-1.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
-          title={theme === "dark" ? "Light mode" : "Dark mode"}
+          className="rounded-lg p-2 text-[var(--color-text-secondary)] transition-colors active:bg-[var(--color-surface-subtle)]"
         >
-          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
         </button>
-        {view === "editor" && (
+        {isEditor && (
           <button
             onClick={onTogglePreview}
-            className="rounded-lg p-1.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
-            title={previewOpen ? "Hide preview" : "Show preview"}
+            className="rounded-lg p-2 text-[var(--color-text-secondary)] transition-colors active:bg-[var(--color-surface-subtle)]"
           >
-            {previewOpen ? <EyeOff size={16} /> : <Eye size={16} />}
+            {previewOpen ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         )}
         <button
           onClick={onProfile}
-          className={`rounded-lg p-1.5 transition-colors ${
+          className={`rounded-lg p-2 transition-colors ${
             view === "profile"
-              ? "text-[var(--color-accent)] bg-[var(--color-accent-light)]"
-              : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)]"
+              ? "text-[var(--color-accent)]"
+              : "text-[var(--color-text-secondary)] active:bg-[var(--color-surface-subtle)]"
           }`}
-          title="Profile"
         >
-          <User size={16} />
+          <User size={18} />
         </button>
       </div>
     </header>

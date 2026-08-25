@@ -136,46 +136,48 @@ export function AppLayout() {
   }
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-[var(--color-surface-subtle)]">
-      <Sidebar
-        open={sidebarOpen && !isMobile}
-        mobileOpen={sidebarOpen && isMobile}
-        view={view}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-        onClose={() => setSidebarOpen(false)}
-        onSelectNote={openNote}
-        onViewChange={setView}
-        activeNoteId={activeNoteId}
-      />
-
-      <div className="flex flex-1 flex-col min-w-0">
-        <TopBar
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+    <div className="flex flex-col h-full w-full overflow-hidden bg-[var(--color-surface-subtle)]" style={{ height: "100dvh" }}>
+      <div className="flex flex-1 min-h-0">
+        <Sidebar
+          open={sidebarOpen && !isMobile}
+          mobileOpen={sidebarOpen && isMobile}
           view={view}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          onClose={() => setSidebarOpen(false)}
+          onSelectNote={openNote}
+          onViewChange={setView}
           activeNoteId={activeNoteId}
-          onBack={goBack}
-          previewOpen={previewOpen}
-          onTogglePreview={() => setPreviewOpen(!previewOpen)}
-          theme={theme}
-          onToggleTheme={toggleTheme}
-          onProfile={() => setView("profile")}
         />
 
-        <main className="flex-1 overflow-hidden bg-[var(--color-surface-subtle)]">
-          {view === "notes" && token && <NotesPage onSelectNote={openNote} />}
-          {view === "editor" && activeNoteId && token && (
-            <NoteEditorPage
-              noteId={activeNoteId}
-              previewOpen={previewOpen}
-              onTogglePreview={() => setPreviewOpen(!previewOpen)}
-              onSelectNote={openNote}
-            />
-          )}
-          {view === "calendar" && token && <CalendarPage onSelectNote={openNote} />}
-          {view === "settings" && <SettingsPage />}
-          {view === "profile" && <ProfilePage />}
-        </main>
+        <div className="flex flex-1 flex-col min-w-0 min-h-0">
+          <TopBar
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            view={view}
+            activeNoteId={activeNoteId}
+            onBack={goBack}
+            previewOpen={previewOpen}
+            onTogglePreview={() => setPreviewOpen(!previewOpen)}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onProfile={() => setView("profile")}
+          />
+
+          <main className="flex-1 min-h-0 overflow-hidden bg-[var(--color-surface-subtle)]">
+            {view === "notes" && token && <NotesPage onSelectNote={openNote} />}
+            {view === "editor" && activeNoteId && token && (
+              <NoteEditorPage
+                noteId={activeNoteId}
+                previewOpen={previewOpen}
+                onTogglePreview={() => setPreviewOpen(!previewOpen)}
+                onSelectNote={openNote}
+              />
+            )}
+            {view === "calendar" && token && <CalendarPage onSelectNote={openNote} />}
+            {view === "settings" && <SettingsPage />}
+            {view === "profile" && <ProfilePage />}
+          </main>
+        </div>
       </div>
 
       {view === "notes" && isMobile && <FAB onClick={handleQuickAdd} />}

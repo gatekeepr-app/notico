@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { FileText, Plus, Trash2, Pin, Download, Sparkles, Hash } from "lucide-react";
+import { FileText, Plus, Trash2, Pin, Download, Sparkles, Hash, Copy, Check } from "lucide-react";
 import { formatDate } from "../lib/utils";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAuth } from "../components/auth/AuthProvider";
 import type { NoteId } from "../types";
 import { downloadAllAsZip } from "../lib/export";
@@ -25,6 +25,7 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
   const createNote = useMutation(api.notes.create);
   const deleteNote = useMutation(api.notes.remove);
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const filtered = activeTag
     ? notes.filter((n: any) => n.tags?.includes(activeTag))
@@ -55,18 +56,45 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
     await deleteNote({ noteId, token });
   };
 
+  const handleCopy = useCallback(async (e: React.MouseEvent, note: any) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(note.content || "");
+      setCopiedId(note._id);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = note.content || "";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopiedId(note._id);
+      setTimeout(() => setCopiedId(null), 1500);
+    }
+  }, []);
+
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="md:max-w-3xl md:mx-auto px-2 md:px-6 py-2 md:py-6">
+    <div className="h-full overflow-y-auto" style={{ WebkitOverflowScrolling: "touch" }}>
+      <div className="md:max-w-3xl md:mx-auto px-4 md:px-6 pt-3 md:pt-6 pb-6">
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg md:text-xl font-semibold text-[var(--color-text)]">
-            {activeTag ? <span className="flex items-center gap-2"><Hash size={18} />{activeTag}</span> : "Notes"}
+            {activeTag ? (
+              <span className="flex items-center gap-2">
+                <Hash size={18} />
+                {activeTag}
+              </span>
+            ) : (
+              "Notes"
+            )}
           </h1>
           <div className="flex items-center gap-2">
             {notes.length > 0 && (
               <button
                 onClick={() => downloadAllAsZip(notes)}
-                className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors"
+                className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors active:scale-95"
               >
                 <Download size={14} />
                 <span className="hidden sm:inline">Export all</span>
@@ -74,7 +102,7 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
             )}
             <button
               onClick={handleCreate}
-              className="flex items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-accent-hover)]"
+              className="flex items-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-accent-hover)] active:scale-95"
             >
               <Plus size={16} />
               <span className="hidden md:inline">New Note</span>
@@ -82,15 +110,17 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
           </div>
         </div>
 
+        {/* Tag filter */}
         {allTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
+          <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
             <button
               onClick={() => setActiveTag(null)}
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
-                activeTag === null
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] border border-[var(--color-border-subtle)]"
-              }`}
+              className="shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-colors active:scale-95"
+              style={{
+                background: activeTag === null ? "var(--color-accent)" : "var(--color-surface)",
+                color: activeTag === null ? "white" : "var(--color-text-secondary)",
+                border: activeTag === null ? "none" : "0.5px solid var(--color-border-subtle)",
+              }}
             >
               All
             </button>
@@ -98,11 +128,12 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
               <button
                 key={tag.name}
                 onClick={() => setActiveTag(tag.name)}
-                className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
-                  activeTag === tag.name
-                    ? "bg-[var(--color-accent)] text-white"
-                    : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] border border-[var(--color-border-subtle)]"
-                }`}
+                className="shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-colors active:scale-95"
+                style={{
+                  background: activeTag === tag.name ? "var(--color-accent)" : "var(--color-surface)",
+                  color: activeTag === tag.name ? "white" : "var(--color-text-secondary)",
+                  border: activeTag === tag.name ? "none" : "0.5px solid var(--color-border-subtle)",
+                }}
               >
                 {tag.name} ({tag.count})
               </button>
@@ -110,16 +141,17 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
           </div>
         )}
 
+        {/* Empty state */}
         {sorted.length === 0 && !activeTag && (
-          <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-6 md:p-8 text-center space-y-6">
+          <div className="rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-8 text-center space-y-6">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-14 h-14 rounded-full bg-[var(--color-accent-light)] flex items-center justify-center">
-                <FileText size={28} className="text-[var(--color-accent)]" />
+              <div className="w-16 h-16 rounded-2xl bg-[var(--color-accent-light)] flex items-center justify-center">
+                <FileText size={32} className="text-[var(--color-accent)]" />
               </div>
               <div>
                 <h2 className="text-base font-semibold text-[var(--color-text)]">Welcome to Notico</h2>
-                <p className="text-sm text-[var(--color-text-secondary)] mt-1 max-w-sm mx-auto">
-                  Your MDX-native note-taking app with real-time sync, AI, and offline support.
+                <p className="text-sm text-[var(--color-text-secondary)] mt-1 max-w-sm mx-auto leading-relaxed">
+                  Your MDX-native note-taking app. Quick, fast, and offline-ready.
                 </p>
               </div>
             </div>
@@ -127,14 +159,14 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
               <button
                 onClick={handleCreate}
-                className="flex items-center justify-center gap-1.5 rounded-lg bg-[var(--color-accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] transition-colors"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] transition-colors active:scale-95"
               >
                 <Plus size={16} />
                 Create your first note
               </button>
               <button
                 onClick={handleCreateDaily}
-                className="flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors"
+                className="flex items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-medium text-[var(--color-text-secondary)] border border-[var(--color-border-subtle)] hover:bg-[var(--color-surface-subtle)] transition-colors active:scale-95"
               >
                 <FileText size={16} />
                 Start daily note
@@ -145,7 +177,7 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
               {TIPS.map((tip) => {
                 const Icon = tip.icon;
                 return (
-                  <div key={tip.text} className="flex items-start gap-2 text-left p-2 rounded-lg bg-[var(--color-surface-subtle)]">
+                  <div key={tip.text} className="flex items-start gap-2.5 text-left p-2.5 rounded-xl bg-[var(--color-surface-subtle)]">
                     <Icon size={14} className="shrink-0 mt-0.5 text-[var(--color-accent)]" />
                     <span className="text-[11px] text-[var(--color-text-secondary)] leading-relaxed">{tip.text}</span>
                   </div>
@@ -155,10 +187,13 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
           </div>
         )}
 
+        {/* Empty tag filter */}
         {sorted.length === 0 && activeTag && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Hash size={36} className="text-[var(--color-text-tertiary)] mb-3" />
-            <p className="text-sm text-[var(--color-text-secondary)]">No notes with tag <strong>{activeTag}</strong></p>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              No notes with tag <strong>{activeTag}</strong>
+            </p>
             <button
               onClick={() => setActiveTag(null)}
               className="mt-2 text-sm text-[var(--color-accent)] hover:underline font-medium"
@@ -168,53 +203,76 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
           </div>
         )}
 
+        {/* Note list */}
         {sorted.length > 0 && (
-          <div className="space-y-1">
-            {sorted.map((note: any) => (
-              <div
-                key={note._id}
-                className="group flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-[var(--color-surface)] cursor-pointer border border-transparent hover:border-[var(--color-border-subtle)]"
-                onClick={() => onSelectNote(note._id)}
-              >
-                <div className="relative shrink-0">
-                  <FileText size={16} className="text-[var(--color-text-tertiary)]" />
-                  {note.isPinned && (
-                    <Pin size={9} className="absolute -top-1 -right-1 text-[var(--color-accent)] fill-[var(--color-accent)]" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[var(--color-text)] truncate">
-                    {note.title || "Untitled"}
-                  </p>
-                  <p className="text-xs text-[var(--color-text-tertiary)] truncate mt-0.5">
-                    {note.content?.slice(0, 80).replace(/[#*`\[\]]/g, "") || "Empty note"}
-                  </p>
-                  {note.tags && note.tags.length > 0 && (
-                    <div className="flex gap-1 mt-1.5 flex-wrap">
-                      {note.tags.map((tag: string) => (
-                        <span
-                          key={tag}
-                          className="text-[10px] rounded-full bg-[var(--color-accent-light)] px-1.5 py-0.5 text-[var(--color-accent)]"
-                        >
-                          {tag}
-                        </span>
-                      ))}
+          <div className="space-y-2">
+            {sorted.map((note: any) => {
+              const isCopied = copiedId === note._id;
+              return (
+                <div
+                  key={note._id}
+                  className="group rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-3.5 transition-all active:scale-[0.98] cursor-pointer hover:border-[var(--color-border)] hover:shadow-sm"
+                  onClick={() => onSelectNote(note._id)}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="relative shrink-0 mt-0.5">
+                      <FileText size={18} className="text-[var(--color-text-tertiary)]" />
+                      {note.isPinned && (
+                        <Pin size={10} className="absolute -top-1.5 -right-1.5 text-[var(--color-accent)] fill-[var(--color-accent)]" />
+                      )}
                     </div>
-                  )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[var(--color-text)] truncate">
+                        {note.title || "Untitled"}
+                      </p>
+                      <p className="text-xs text-[var(--color-text-tertiary)] truncate mt-1 leading-relaxed">
+                        {note.content?.slice(0, 100).replace(/[#*`\[\]]/g, "") || "Empty note"}
+                      </p>
+                      {note.tags && note.tags.length > 0 && (
+                        <div className="flex gap-1 mt-2 flex-wrap">
+                          {note.tags.map((tag: string) => (
+                            <span
+                              key={tag}
+                              className="text-[10px] rounded-full px-2 py-0.5 font-medium"
+                              style={{
+                                background: "var(--color-accent-light)",
+                                color: "var(--color-accent)",
+                              }}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                        {formatDate(note.updatedAt)}
+                      </span>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => handleCopy(e, note)}
+                          className="rounded-lg p-1.5 transition-colors active:scale-90"
+                          style={{
+                            color: isCopied ? "#22c55e" : "var(--color-text-tertiary)",
+                            background: isCopied ? "#f0fdf4" : "transparent",
+                          }}
+                          title="Copy content"
+                        >
+                          {isCopied ? <Check size={13} /> : <Copy size={13} />}
+                        </button>
+                        <button
+                          onClick={(e) => handleDelete(e, note._id)}
+                          className="rounded-lg p-1.5 text-[var(--color-text-tertiary)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors active:scale-90"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[11px] text-[var(--color-text-tertiary)] hidden sm:block">
-                    {formatDate(note.updatedAt)}
-                  </span>
-                  <button
-                    onClick={(e) => handleDelete(e, note._id)}
-                    className="opacity-0 group-hover:opacity-100 rounded-lg p-1.5 text-[var(--color-text-tertiary)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

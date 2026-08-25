@@ -161,9 +161,20 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
     <>
       {mobileOpen && (
         <div className="fixed inset-0 z-30 md:hidden" onClick={onClose}>
-          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+          <div
+            className="absolute inset-0 transition-opacity duration-200"
+            style={{
+              background: "rgba(0,0,0,0.3)",
+              WebkitBackdropFilter: "blur(4px)",
+              backdropFilter: "blur(4px)",
+            }}
+          />
           <aside
-            className="relative w-80 max-w-[85vw] h-full bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col sidebar-slide-in"
+            className="relative w-80 max-w-[85vw] h-full bg-[var(--color-surface)] flex flex-col sidebar-slide-in"
+            style={{
+              boxShadow: "4px 0 24px rgba(0,0,0,0.08)",
+              borderRight: "0.5px solid var(--color-border)",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {content}

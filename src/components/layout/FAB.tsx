@@ -8,10 +8,16 @@ export function FAB({ onClick }: FABProps) {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-20 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent)]/25 transition-all duration-200 hover:bg-[var(--color-accent-hover)] hover:shadow-xl hover:scale-105 active:scale-95"
-      style={{ bottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
+      className="fixed z-40 flex items-center justify-center rounded-full bg-[var(--color-accent)] text-white shadow-lg transition-all duration-200 active:scale-95 md:hidden"
+      style={{
+        right: "1rem",
+        bottom: "calc(var(--nav-height) + var(--safe-area-bottom) + 0.75rem)",
+        width: "3.25rem",
+        height: "3.25rem",
+        boxShadow: "0 4px 20px color-mix(in srgb, var(--color-accent) 35%, transparent)",
+      }}
     >
-      <Plus size={22} />
+      <Plus size={22} strokeWidth={2.5} />
     </button>
   );
 }

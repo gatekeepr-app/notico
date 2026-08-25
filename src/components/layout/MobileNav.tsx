@@ -16,24 +16,39 @@ export function MobileNav({ view, onViewChange }: MobileNavProps) {
   ];
 
   return (
-    <nav className="md:hidden flex items-center justify-around h-14 bg-[var(--color-surface)] border-t border-[var(--color-border)] shrink-0" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      {items.map(({ id, label, icon: Icon }) => (
-        <button
-          key={id}
-          onClick={() => onViewChange(id)}
-          className={`flex flex-col items-center justify-center gap-0.5 min-w-0 flex-1 h-full transition-colors relative ${
-            view === id
-              ? "text-[var(--color-accent)]"
-              : "text-[var(--color-text-tertiary)]"
-          }`}
-        >
-          <Icon size={20} />
-          <span className="text-[10px] font-medium leading-none">{label}</span>
-          {view === id && (
-            <span className="absolute top-0 left-[20%] right-[20%] h-0.5 rounded-full bg-[var(--color-accent)]" />
-          )}
-        </button>
-      ))}
+    <nav
+      className="md:hidden flex items-center justify-around shrink-0"
+      style={{
+        height: "var(--nav-height)",
+        paddingBottom: "var(--safe-area-bottom)",
+        background: "color-mix(in srgb, var(--color-surface) 80%, transparent)",
+        WebkitBackdropFilter: "saturate(180%) blur(20px)",
+        backdropFilter: "saturate(180%) blur(20px)",
+        borderTop: "0.5px solid var(--color-border)",
+      }}
+    >
+      {items.map(({ id, label, icon: Icon }) => {
+        const active = view === id;
+        return (
+          <button
+            key={id}
+            onClick={() => onViewChange(id)}
+            className="relative flex flex-col items-center justify-center gap-px min-w-0 flex-1 h-full transition-colors"
+            style={{
+              WebkitTapHighlightColor: "transparent",
+              color: active ? "var(--color-accent)" : "var(--color-text-tertiary)",
+            }}
+          >
+            <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+            <span
+              className="text-[10px] leading-none"
+              style={{ fontWeight: active ? 600 : 500 }}
+            >
+              {label}
+            </span>
+          </button>
+        );
+      })}
     </nav>
   );
 }
