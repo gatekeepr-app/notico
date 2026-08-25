@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notico — Offline</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #fafafa;
+        color: #1d1d1f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      .box { text-align: center; max-width: 320px; }
+      .icon { width: 56px; height: 56px; border-radius: 16px; background: #EDE9FE; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+      .icon svg { width: 28px; height: 28px; color: #8B5CF6; }
+      h1 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+      p { font-size: 14px; color: #86868b; line-height: 1.5; margin-bottom: 20px; }
+      button {
+        background: #8B5CF6;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      button:hover { background: #7C3AED; }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01" />
+        </svg>
+      </div>
+      <h1>You're offline</h1>
+      <p>Notico works offline — your notes are saved locally. Reconnect to sync.</p>
+      <button onclick="location.reload()">Try again</button>
+    </div>
+  </body>
+</html>

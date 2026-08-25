@@ -18,10 +18,11 @@
 - [x] Auth hardening — folders user-scoped, search index userId filter
 - [x] Extension React sidebar — Vite + React + Tailwind build
 - [x] Responsive shell — safe areas, swipe back, mobile sidebar animation
+- [x] PWA hardening — offline fallback, Google Fonts caching, manifest id
 
 ## In Progress
 
-- [ ] 2.4 PWA hardening — offline, install prompt, service worker
+- [ ] 2.5 User settings — per-user prefs, theme sync, data export
 
 ## Next
 
@@ -37,7 +38,7 @@
 - [x] **2.1** Auth hardening — user-scoped queries
 - [x] **2.2** Landing page — complete
 - [x] **2.3** Responsive shell — breakpoints, mobile overlays, touch gestures
-- [ ] **2.4** PWA hardening — offline fallback, workbox, install prompt, push notifications
+- [x] **2.4** PWA hardening — offline fallback, workbox, install prompt, push notifications
 - [ ] **2.5** User settings — per-user preferences, data export, theme sync
 
 ## Backlog

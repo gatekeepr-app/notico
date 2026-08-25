@@ -11,6 +11,7 @@ export default defineConfig({
         name: "Notico",
         short_name: "Notico",
         description: "MDX-native note-taking PWA",
+        id: "/",
         theme_color: "#FAFAFA",
         background_color: "#FAFAFA",
         display: "standalone",
@@ -25,11 +26,23 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        navigateFallback: "/offline.html",
+        navigateFallbackAllowlist: [/^(?!\/api)/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.convex\.site\/.*/i,
             handler: "NetworkFirst",
             options: { cacheName: "convex-api", expiration: { maxEntries: 100, maxAgeSeconds: 86400 } },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "google-fonts-stylesheets", expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 } },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: { cacheName: "google-fonts-webfonts", expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 } },
           },
         ],
       },
