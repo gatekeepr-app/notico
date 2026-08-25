@@ -2,6 +2,14 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
+  server: {
+    proxy: {
+      "/api/uploadthing": {
+        target: "http://localhost:3456",
+        changeOrigin: true,
+      },
+    },
+  },
   plugins: [
     tailwindcss(),
     VitePWA({

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { NoteId } from "../../types";
 import { formatDate } from "../../lib/utils";
+import { FolderModal } from "../FolderModal";
 
 type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
 
@@ -28,6 +29,7 @@ interface SidebarProps {
 export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewChange, activeNoteId }: SidebarProps) {
   const { token, user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
+  const [folderModalOpen, setFolderModalOpen] = useState(false);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const allNotes = useQuery(api.notes.list, token ? { token } : "skip");
   const taggedNotes = useQuery(api.notes.listByTag, token && activeTag ? { tag: activeTag, token } : "skip");
@@ -51,12 +53,9 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
     if (mobileOpen) onClose();
   };
 
-  const handleNewFolder = async () => {
+  const handleNewFolder = async (name: string) => {
     if (!token) return;
-    const name = prompt("Folder name:");
-    if (name?.trim()) {
-      await createFolder({ name: name.trim(), token });
-    }
+    await createFolder({ name, token });
   };
 
   const handleSelectTag = (tag: string | null) => {
@@ -84,7 +83,7 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
         </div>
         <div className="flex items-center gap-0.5">
           <button
-            onClick={handleNewFolder}
+            onClick={() => setFolderModalOpen(true)}
             className="rounded-lg p-1.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
             title="New folder"
           >
@@ -249,6 +248,11 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
       </aside>
 
       {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} onSelectNote={onSelectNote} />}
+      <FolderModal
+        open={folderModalOpen}
+        onClose={() => setFolderModalOpen(false)}
+        onSubmit={handleNewFolder}
+      />
     </>
   );
 }

@@ -11,7 +11,7 @@ import { useEffect, useCallback, useState } from "react";
 import {
   Bold, Italic, Heading1, Heading2, Heading3,
   List, ListOrdered, Code, Quote, Undo, Redo,
-  CheckSquare, Image,
+  CheckSquare, Image, Loader2,
 } from "lucide-react";
 import { SlashMenu } from "./SlashMenu";
 import { useToast } from "../Toast";
@@ -23,9 +23,24 @@ interface TiptapEditorProps {
   onChange: (html: string) => void;
 }
 
+async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("files", file);
+
+  const res = await fetch("/api/uploadthing/imageUploader", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error("Upload failed");
+  const data = await res.json();
+  return data.data?.[0]?.url || data.url;
+}
+
 export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
   const { toast } = useToast();
   const [editorReady, setEditorReady] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -56,13 +71,8 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
             event.preventDefault();
             const file = item.getAsFile();
             if (file) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const url = e.target?.result as string;
-                editor?.chain().focus().setImage({ src: url }).run();
-              };
-              reader.readAsDataURL(file);
-              toast("Image pasted (stored inline)");
+              handleImageUpload(file);
+              toast("Uploading pasted image...");
             }
             return true;
           }
@@ -75,13 +85,8 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
         for (const file of Array.from(files)) {
           if (file.type.startsWith("image/")) {
             event.preventDefault();
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const url = e.target?.result as string;
-              editor?.chain().focus().setImage({ src: url }).run();
-            };
-            reader.readAsDataURL(file);
-            toast("Image dropped (stored inline)");
+            handleImageUpload(file);
+            toast("Uploading dropped image...");
             return true;
           }
         }
@@ -90,6 +95,19 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
     },
     onCreate: () => setEditorReady(true),
   });
+
+  const handleImageUpload = useCallback(async (file: File) => {
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      editor?.chain().focus().setImage({ src: url }).run();
+      toast("Image uploaded");
+    } catch {
+      toast("Image upload failed", "error");
+    } finally {
+      setUploading(false);
+    }
+  }, [editor, toast]);
 
   useEffect(() => {
     if (editor && content && editor.getHTML() !== content) {
@@ -104,12 +122,13 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
 
   if (!editor) return null;
 
-  const MenuButton = ({ onClick, active, children }: { onClick: () => void; active?: boolean; children: React.ReactNode }) => (
+  const MenuButton = ({ onClick, active, children, disabled }: { onClick: () => void; active?: boolean; children: React.ReactNode; disabled?: boolean }) => (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={`rounded-lg p-1.5 md:p-1 transition-colors ${
         active ? "bg-[var(--color-accent-light)] text-[var(--color-accent)]" : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)]"
-      }`}
+      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {children}
     </button>
@@ -150,25 +169,20 @@ export function TiptapEditor({ content, onChange }: TiptapEditorProps) {
         <MenuButton onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive("codeBlock")}>
           <Code size={16} />
         </MenuButton>
-        <MenuButton onClick={() => {
-          const input = document.createElement("input");
-          input.type = "file";
-          input.accept = "image/*";
-          input.onchange = () => {
-            const file = input.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const url = e.target?.result as string;
-                editor.chain().focus().setImage({ src: url }).run();
-                toast("Image inserted");
-              };
-              reader.readAsDataURL(file);
-            }
-          };
-          input.click();
-        }}>
-          <Image size={16} />
+        <MenuButton
+          onClick={() => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/*";
+            input.onchange = () => {
+              const file = input.files?.[0];
+              if (file) handleImageUpload(file);
+            };
+            input.click();
+          }}
+          disabled={uploading}
+        >
+          {uploading ? <Loader2 size={16} className="animate-spin" /> : <Image size={16} />}
         </MenuButton>
         <span className="flex-1" />
         <MenuButton onClick={() => editor.chain().focus().undo().run()}>

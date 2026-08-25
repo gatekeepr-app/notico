@@ -14,7 +14,7 @@ export const list = query({
     if (!session || session.expiresAt < Date.now()) return [];
 
     const now = Date.now();
-    const isExpired = (n: { expiresAt?: number }) => !n.expiresAt || n.expiresAt > now;
+    const isVisible = (n: { expiresAt?: number; isPinned?: boolean }) => n.isPinned || !n.expiresAt || n.expiresAt > now;
 
     if (args.folderId) {
       return await ctx.db
@@ -22,14 +22,14 @@ export const list = query({
         .withIndex("by_folder", (q) => q.eq("folderId", args.folderId!))
         .order("desc")
         .collect()
-        .then((notes) => notes.filter((n) => n.userId === session.userId && isExpired(n)));
+        .then((notes) => notes.filter((n) => n.userId === session.userId && isVisible(n)));
     }
     return await ctx.db
       .query("notes")
       .withIndex("by_user", (q) => q.eq("userId", session.userId))
       .order("desc")
       .collect()
-      .then((notes) => notes.filter(isExpired));
+      .then((notes) => notes.filter(isVisible));
   },
 });
 
@@ -138,7 +138,7 @@ export const search = query({
         q.search("content", args.query).eq("userId", session.userId)
       )
       .take(20)
-      .then((notes) => notes.filter((n) => !n.expiresAt || n.expiresAt > now));
+      .then((notes) => notes.filter((n) => n.isPinned || !n.expiresAt || n.expiresAt > now));
   },
 });
 
@@ -156,7 +156,7 @@ export const getAllTags = query({
       .query("notes")
       .withIndex("by_user", (q) => q.eq("userId", session.userId))
       .collect()
-      .then((ns) => ns.filter((n) => !n.expiresAt || n.expiresAt > now));
+      .then((ns) => ns.filter((n) => n.isPinned || !n.expiresAt || n.expiresAt > now));
     const tagCounts: Record<string, number> = {};
     for (const note of notes) {
       for (const tag of note.tags) {
@@ -184,7 +184,7 @@ export const listByTag = query({
       .withIndex("by_user", (q) => q.eq("userId", session.userId))
       .collect()
       .then((notes) =>
-        notes.filter((n) => n.tags.includes(args.tag) && (!n.expiresAt || n.expiresAt > now))
+        notes.filter((n) => n.tags.includes(args.tag) && (n.isPinned || !n.expiresAt || n.expiresAt > now))
       );
   },
 });
@@ -203,7 +203,7 @@ export const cleanupExpired = mutation({
       .query("notes")
       .withIndex("by_user", (q) => q.eq("userId", session.userId))
       .collect()
-      .then((ns) => ns.filter((n) => n.expiresAt && n.expiresAt <= now));
+      .then((ns) => ns.filter((n) => n.expiresAt && n.expiresAt <= now && !n.isPinned));
 
     for (const note of expired) {
       await ctx.db.delete(note._id);
