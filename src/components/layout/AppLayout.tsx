@@ -41,6 +41,12 @@ export function AppLayout() {
   }, [theme]);
 
   useEffect(() => {
+    if (!window.history.state) {
+      window.history.replaceState({ view: "notes" }, "");
+    }
+  }, []);
+
+  useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -83,11 +89,31 @@ export function AppLayout() {
     setActiveNoteId(id);
     setView("editor");
     setSidebarOpen(false);
+    window.history.pushState({ view: "editor", noteId: id }, "");
   }, []);
 
   const goBack = useCallback(() => {
-    setActiveNoteId(null);
-    setView("notes");
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      setActiveNoteId(null);
+      setView("notes");
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPopState = () => {
+      const state = window.history.state;
+      if (state?.view === "editor" && state?.noteId) {
+        setActiveNoteId(state.noteId);
+        setView("editor");
+      } else {
+        setActiveNoteId(null);
+        setView("notes");
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   useEffect(() => {
@@ -171,6 +197,7 @@ export function AppLayout() {
                 previewOpen={previewOpen}
                 onTogglePreview={() => setPreviewOpen(!previewOpen)}
                 onSelectNote={openNote}
+                onGoBack={goBack}
               />
             )}
             {view === "calendar" && token && <CalendarPage onSelectNote={openNote} />}

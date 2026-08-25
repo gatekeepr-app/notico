@@ -20,9 +20,10 @@ interface NoteEditorPageProps {
   previewOpen: boolean;
   onTogglePreview: () => void;
   onSelectNote: (id: NoteId) => void;
+  onGoBack?: () => void;
 }
 
-export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectNote }: NoteEditorPageProps) {
+export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectNote, onGoBack }: NoteEditorPageProps) {
   const { token } = useAuth();
   const note = useQuery(api.notes.get, token ? { noteId, token } : "skip");
   const allTags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
@@ -162,10 +163,28 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
     return () => clearTimeout(saveTimer.current);
   }, []);
 
-  if (!note || !mounted) {
+  if (note === undefined || !mounted) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-accent)]" />
+      </div>
+    );
+  }
+
+  if (note === null) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center space-y-3">
+          <p className="text-sm text-[var(--color-text-secondary)]">Note not found or expired</p>
+          {onGoBack && (
+            <button
+              onClick={onGoBack}
+              className="text-sm text-[var(--color-accent)] font-medium hover:underline"
+            >
+              Back to notes
+            </button>
+          )}
+        </div>
       </div>
     );
   }
