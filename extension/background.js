@@ -1,4 +1,4 @@
-const CONVEX_URL = "https://admirable-swan-348.convex.cloud";
+const CONVEX_URL = "https://calm-pig-803.convex.cloud";
 
 async function getAuthToken() {
   const result = await chrome.storage.local.get("authToken");
@@ -83,14 +83,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "PAIR_EXTENSION") {
-    convexQuery("pairing:validate", { code: message.code })
+    convexMutation("pairing:claim", { code: message.code })
       .then(async (result) => {
-        if (result.valid) {
-          await chrome.storage.local.set({ userId: result.userId, paired: true });
-          sendResponse({ success: true, userId: result.userId });
-        } else {
-          sendResponse({ success: false, error: result.error });
-        }
+        await chrome.storage.local.set({ authToken: result.token, paired: true });
+        sendResponse({ success: true });
       })
       .catch((err) => sendResponse({ success: false, error: err.message }));
     return true;
@@ -104,8 +100,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.type === "GET_PAIR_STATUS") {
-    chrome.storage.local.get(["userId", "paired"]).then((result) => {
-      sendResponse({ success: true, paired: !!result.paired && !!result.userId, userId: result.userId });
+    chrome.storage.local.get(["paired", "authToken"]).then((result) => {
+      sendResponse({ success: true, paired: !!result.paired && !!result.authToken });
     });
     return true;
   }

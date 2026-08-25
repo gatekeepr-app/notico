@@ -49,3 +49,33 @@ export const validate = query({
     return { valid: true as const, userId: pairing.userId };
   },
 });
+
+function generateToken(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return Array.from(array).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export const claim = mutation({
+  args: { code: v.string() },
+  handler: async (ctx, args) => {
+    const pairing = await ctx.db
+      .query("pairing_codes")
+      .withIndex("by_code", (q) => q.eq("code", args.code))
+      .unique();
+
+    if (!pairing) throw new Error("Invalid code");
+    if (pairing.expiresAt < Date.now()) throw new Error("Code expired");
+
+    await ctx.db.delete(pairing._id);
+
+    const token = generateToken();
+    await ctx.db.insert("sessions", {
+      userId: pairing.userId,
+      token,
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+    });
+
+    return { token };
+  },
+});
