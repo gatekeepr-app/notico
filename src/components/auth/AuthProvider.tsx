@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const me = useQuery(api.auth.me, token ? { token } : "skip");
 
   useEffect(() => {
-    if (me !== undefined) setLoading(false);
-  }, [me]);
+    if (me !== undefined || !token) setLoading(false);
+  }, [me, token]);
 
   const signup = useCallback(async (email: string, password: string, name?: string) => {
     const result = await signupMutation({ email, password, name });
