@@ -7,7 +7,7 @@ import {
   getNotes,
   type Note,
 } from "./lib/messages";
-import { Link, Unlink, Send, Trash2 } from "lucide-react";
+import { Link, Send, Trash2 } from "lucide-react";
 
 function PairScreen({ onPaired }: { onPaired: () => void }) {
   const [code, setCode] = useState("");
@@ -113,11 +113,9 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
         Paste anything. Saves for 10 min. Cmd+Enter to save.
       </p>
 
-      <div className="flex items-center gap-2 px-2 py-1.5 bg-green-50 border border-green-200 rounded-lg dark:bg-green-950 dark:border-green-900">
+      <div className="flex items-center gap-2 px-2 py-1.5 bg-green-50 border border-green-200 rounded-lg">
         <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-        <span className="text-xs text-green-700 dark:text-green-400 font-medium">
-          Paired
-        </span>
+        <span className="text-xs text-green-700 font-medium">Paired</span>
       </div>
 
       <textarea
@@ -127,7 +125,7 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSave();
         }}
         placeholder="Paste or type something..."
-        className="flex-1 min-h-[100px] border border-border rounded-lg px-2 py-1.5 text-xs font-mono resize-y outline-none focus:border-accent bg-white dark:bg-surface-subtle"
+        className="flex-1 min-h-[100px] border border-border rounded-lg px-2 py-1.5 text-xs font-mono resize-y outline-none focus:border-accent bg-white"
       />
 
       <button
@@ -162,7 +160,7 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
           return (
             <div
               key={n._id}
-              className="p-2 border border-border rounded-lg bg-white dark:bg-surface-subtle"
+              className="p-2 border border-border rounded-lg bg-white"
             >
               <h3 className="text-xs font-medium truncate">
                 {n.title || "Untitled"}
@@ -174,7 +172,7 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
                 <span
                   className={`inline-block text-[9px] mt-1 px-1.5 py-0.5 rounded ${
                     mins <= 0
-                      ? "bg-red-50 text-red-500 dark:bg-red-950"
+                      ? "bg-red-50 text-red-500"
                       : "bg-accent-light text-accent"
                   }`}
                 >
@@ -188,7 +186,7 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
 
       <button
         onClick={handleUnpair}
-        className="flex items-center justify-center gap-1.5 border border-red-200 text-red-500 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:bg-red-50 dark:hover:bg-red-950 transition-colors mt-1"
+        className="flex items-center justify-center gap-1.5 border border-red-200 text-red-500 rounded-lg px-3 py-1.5 text-[11px] font-medium hover:bg-red-50 transition-colors mt-1"
       >
         <Trash2 size={11} />
         Unpair
