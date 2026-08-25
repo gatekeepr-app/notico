@@ -158,7 +158,11 @@ export function AppLayout() {
   }
 
   if (!user) {
-    return <LandingPage />;
+    return (
+      <div className="h-dvh overflow-y-auto bg-[var(--color-surface-subtle)]">
+        <LandingPage />
+      </div>
+    );
   }
 
   return (
