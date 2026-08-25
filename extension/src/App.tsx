@@ -5,9 +5,13 @@ import {
   unpairExtension,
   saveQuickNote,
   getNotes,
+  getTags,
+  getFolders,
   type Note,
+  type Tag,
+  type Folder,
 } from "./lib/messages";
-import { Link, Send, Trash2 } from "lucide-react";
+import { Link, Send, Trash2, Tag, FolderOpen, X } from "lucide-react";
 
 function PairScreen({ onPaired }: { onPaired: () => void }) {
   const [code, setCode] = useState("");
@@ -66,6 +70,11 @@ function PairScreen({ onPaired }: { onPaired: () => void }) {
 function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
   const [content, setContent] = useState("");
   const [notes, setNotes] = useState<Note[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string>("");
+  const [newTag, setNewTag] = useState("");
   const [status, setStatus] = useState("");
   const [statusType, setStatusType] = useState<"ok" | "error">("ok");
   const [saving, setSaving] = useState(false);
@@ -77,9 +86,25 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
     }
   }, []);
 
+  const loadTags = useCallback(async () => {
+    const res = await getTags();
+    if (res.success && res.tags) {
+      setTags(res.tags);
+    }
+  }, []);
+
+  const loadFolders = useCallback(async () => {
+    const res = await getFolders();
+    if (res.success && res.folders) {
+      setFolders(res.folders);
+    }
+  }, []);
+
   useEffect(() => {
     loadNotes();
-  }, [loadNotes]);
+    loadTags();
+    loadFolders();
+  }, [loadNotes, loadTags, loadFolders]);
 
   const handleSave = async () => {
     const text = content.trim();
@@ -87,17 +112,27 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
     setSaving(true);
     const title =
       text.split("\n")[0].replace(/^#\s*/, "").slice(0, 40) || "Quick note";
-    const res = await saveQuickNote(title, text);
+    const allTags = selectedTags.includes(newTag.trim()) ? selectedTags : newTag.trim() ? [...selectedTags, newTag.trim()] : selectedTags;
+    const res = await saveQuickNote(title, text, allTags.length > 0 ? allTags : undefined, selectedFolder || undefined);
     if (res.success) {
       setContent("");
+      setSelectedTags([]);
+      setNewTag("");
       setStatus("Saved! (expires in 10 min)");
       setStatusType("ok");
       loadNotes();
+      loadTags();
     } else {
       setStatus("Failed: " + (res.error || "unknown"));
       setStatusType("error");
     }
     setSaving(false);
+  };
+
+  const toggleTag = (name: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(name) ? prev.filter((t) => t !== name) : [...prev, name]
+    );
   };
 
   const handleUnpair = async () => {
@@ -125,8 +160,60 @@ function MainScreen({ onUnpaired }: { onUnpaired: () => void }) {
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSave();
         }}
         placeholder="Paste or type something..."
-        className="flex-1 min-h-[100px] border border-border rounded-lg px-2 py-1.5 text-xs font-mono resize-y outline-none focus:border-accent bg-white"
+        className="flex-1 min-h-[80px] border border-border rounded-lg px-2 py-1.5 text-xs font-mono resize-y outline-none focus:border-accent bg-white"
       />
+
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5">
+          <Tag size={11} className="text-text-secondary shrink-0" />
+          <input
+            type="text"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            placeholder="Add tag..."
+            className="flex-1 text-[11px] border border-border rounded px-2 py-1 outline-none focus:border-accent bg-white"
+          />
+        </div>
+        {(tags.length > 0 || selectedTags.length > 0) && (
+          <div className="flex flex-wrap gap-1">
+            {tags.filter((t) => !selectedTags.includes(t.name)).slice(0, 6).map((t) => (
+              <button
+                key={t.name}
+                onClick={() => toggleTag(t.name)}
+                className="text-[9px] px-1.5 py-0.5 rounded bg-gray-100 text-text-secondary hover:bg-accent-light hover:text-accent transition-colors"
+              >
+                {t.name}
+              </button>
+            ))}
+            {selectedTags.map((t) => (
+              <button
+                key={t}
+                onClick={() => toggleTag(t)}
+                className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded bg-accent-light text-accent"
+              >
+                {t}
+                <X size={8} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {folders.length > 0 && (
+        <div className="flex items-center gap-1.5">
+          <FolderOpen size={11} className="text-text-secondary shrink-0" />
+          <select
+            value={selectedFolder}
+            onChange={(e) => setSelectedFolder(e.target.value)}
+            className="flex-1 text-[11px] border border-border rounded px-2 py-1 outline-none focus:border-accent bg-white truncate"
+          >
+            <option value="">No folder</option>
+            {folders.map((f) => (
+              <option key={f._id} value={f._id}>{f.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <button
         onClick={handleSave}

@@ -52,6 +52,7 @@ export const create = mutation({
   args: {
     title: v.string(),
     content: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
     folderId: v.optional(v.id("folders")),
     token: v.string(),
   },
@@ -66,7 +67,7 @@ export const create = mutation({
     return await ctx.db.insert("notes", {
       title: args.title,
       content: args.content ?? "",
-      tags: [],
+      tags: args.tags ?? [],
       folderId: args.folderId,
       userId: session.userId,
       isPinned: false,

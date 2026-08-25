@@ -39,6 +39,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const result = await convexMutation("notes:create", {
           title: message.title,
           content: message.content,
+          tags: message.tags || [],
+          folderId: message.folderId || undefined,
           token,
         });
         sendResponse({ success: true, result });
@@ -53,6 +55,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (!token) return sendResponse({ success: false, error: "Not paired" });
         const notes = await convexQuery("notes:list", { token });
         sendResponse({ success: true, notes });
+      })
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message.type === "GET_TAGS") {
+    getAuthToken()
+      .then(async (token) => {
+        if (!token) return sendResponse({ success: false, error: "Not paired" });
+        const tags = await convexQuery("notes:getAllTags", { token });
+        sendResponse({ success: true, tags });
+      })
+      .catch((err) => sendResponse({ success: false, error: err.message }));
+    return true;
+  }
+
+  if (message.type === "GET_FOLDERS") {
+    getAuthToken()
+      .then(async (token) => {
+        if (!token) return sendResponse({ success: false, error: "Not paired" });
+        const folders = await convexQuery("folders:list", { token });
+        sendResponse({ success: true, folders });
       })
       .catch((err) => sendResponse({ success: false, error: err.message }));
     return true;

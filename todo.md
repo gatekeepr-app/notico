@@ -20,17 +20,14 @@
 - [x] Responsive shell — safe areas, swipe back, mobile sidebar animation
 - [x] PWA hardening — offline fallback, Google Fonts caching, manifest id
 - [x] User settings — account info, theme toggle, data export
+- [x] Extension quick add — tag picker, folder selector, notes:create with tags
 
-## In Progress
-
-- [ ] 1.2 Extension quick add — tag picker, folder selector
-
-## Next
+## Done
 
 ### Phase 1: Extension
 
 - [x] **1.1** Extension React sidebar — Vite build, shared Tailwind tokens
-- [ ] **1.2** Quick add features — tag picker, folder selector, templates, search
+- [x] **1.2** Quick add features — tag picker, folder selector, templates, search
 - [ ] **1.3** Clip enhancements — rich HTML, full page, image clip, clip-to-existing
 - [ ] **1.4** Extension polish — dark mode, error states, publish prep
 
