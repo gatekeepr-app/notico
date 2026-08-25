@@ -16,16 +16,17 @@
 - [x] PWA icons (192, 512)
 - [x] Quick switcher (Cmd+K)
 - [x] Auth hardening — folders user-scoped, search index userId filter
+- [x] Extension React sidebar — Vite + React + Tailwind build
 
 ## In Progress
 
-- [ ] Extension React sidebar rebuild (Step 1.1)
+- [ ] Quick add features — tag picker, folder selector (Step 1.2)
 
 ## Next
 
 ### Phase 1: Extension
 
-- [ ] **1.1** Extension React sidebar — Vite build, shared Tailwind tokens
+- [x] **1.1** Extension React sidebar — Vite build, shared Tailwind tokens
 - [ ] **1.2** Quick add features — tag picker, folder selector, templates, search
 - [ ] **1.3** Clip enhancements — rich HTML, full page, image clip, clip-to-existing
 - [ ] **1.4** Extension polish — dark mode, error states, publish prep
