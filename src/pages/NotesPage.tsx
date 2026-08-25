@@ -3,6 +3,7 @@ import { api } from "../../convex/_generated/api";
 import { FileText, Plus, Trash2, Pin, Download, Sparkles, Hash } from "lucide-react";
 import { formatDate } from "../lib/utils";
 import { useState } from "react";
+import { useAuth } from "../components/auth/AuthProvider";
 import type { NoteId } from "../types";
 import { downloadAllAsZip } from "../lib/export";
 
@@ -18,8 +19,9 @@ const TIPS = [
 ];
 
 export function NotesPage({ onSelectNote }: NotesPageProps) {
-  const notes = useQuery(api.notes.list, {}) ?? [];
-  const allTags = useQuery(api.notes.getAllTags) ?? [];
+  const { token } = useAuth();
+  const notes = useQuery(api.notes.list, token ? { token } : "skip") ?? [];
+  const allTags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
   const createNote = useMutation(api.notes.create);
   const deleteNote = useMutation(api.notes.remove);
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -34,14 +36,23 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
   });
 
   const handleCreate = async () => {
-    const id = await createNote({ title: "Untitled" });
+    if (!token) return;
+    const id = await createNote({ title: "Untitled", token });
     onSelectNote(id);
   };
 
   const handleCreateDaily = async () => {
+    if (!token) return;
     const today = new Date().toISOString().slice(0, 10);
-    const id = await createNote({ title: `Daily Note — ${today}` });
+    const id = await createNote({ title: `Daily Note — ${today}`, token });
     onSelectNote(id);
+  };
+
+  const handleDelete = async (e: React.MouseEvent, noteId: NoteId) => {
+    e.stopPropagation();
+    if (!token) return;
+    if (!confirm("Delete this note?")) return;
+    await deleteNote({ noteId, token });
   };
 
   return (
@@ -196,7 +207,7 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
                     {formatDate(note.updatedAt)}
                   </span>
                   <button
-                    onClick={(e) => { e.stopPropagation(); deleteNote({ noteId: note._id }); }}
+                    onClick={(e) => handleDelete(e, note._id)}
                     className="opacity-0 group-hover:opacity-100 rounded-lg p-1.5 text-[var(--color-text-tertiary)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-all"
                   >
                     <Trash2 size={14} />

@@ -2,27 +2,49 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 export const list = query({
-  args: { folderId: v.optional(v.id("folders")) },
+  args: {
+    folderId: v.optional(v.id("folders")),
+    token: v.string(),
+  },
   handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return [];
+
+    const now = Date.now();
+    const isExpired = (n: { expiresAt?: number }) => !n.expiresAt || n.expiresAt > now;
+
     if (args.folderId) {
       return await ctx.db
         .query("notes")
         .withIndex("by_folder", (q) => q.eq("folderId", args.folderId!))
         .order("desc")
-        .collect();
+        .collect()
+        .then((notes) => notes.filter((n) => n.userId === session.userId && isExpired(n)));
     }
     return await ctx.db
       .query("notes")
-      .withIndex("by_updated")
+      .withIndex("by_user", (q) => q.eq("userId", session.userId))
       .order("desc")
-      .collect();
+      .collect()
+      .then((notes) => notes.filter(isExpired));
   },
 });
 
 export const get = query({
-  args: { noteId: v.id("notes") },
+  args: { noteId: v.id("notes"), token: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.noteId);
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return null;
+
+    const note = await ctx.db.get(args.noteId);
+    if (!note || note.userId !== session.userId) return null;
+    return note;
   },
 });
 
@@ -31,16 +53,25 @@ export const create = mutation({
     title: v.string(),
     content: v.optional(v.string()),
     folderId: v.optional(v.id("folders")),
+    token: v.string(),
   },
   handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) throw new Error("Not authenticated");
+
     const now = Date.now();
     return await ctx.db.insert("notes", {
       title: args.title,
       content: args.content ?? "",
       tags: [],
       folderId: args.folderId,
+      userId: session.userId,
       isPinned: false,
       isPublished: false,
+      expiresAt: now + 10 * 60 * 1000,
       createdAt: now,
       updatedAt: now,
     });
@@ -57,33 +88,74 @@ export const update = mutation({
     isPinned: v.optional(v.boolean()),
     isPublished: v.optional(v.boolean()),
     publishedSlug: v.optional(v.string()),
+    token: v.string(),
   },
   handler: async (ctx, args) => {
-    const { noteId, ...fields } = args;
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) throw new Error("Not authenticated");
+
+    const note = await ctx.db.get(args.noteId);
+    if (!note || note.userId !== session.userId) throw new Error("Not found");
+
+    const { noteId, token, ...fields } = args;
     await ctx.db.patch(noteId, { ...fields, updatedAt: Date.now() });
   },
 });
 
 export const remove = mutation({
-  args: { noteId: v.id("notes") },
+  args: { noteId: v.id("notes"), token: v.string() },
   handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) throw new Error("Not authenticated");
+
+    const note = await ctx.db.get(args.noteId);
+    if (!note || note.userId !== session.userId) throw new Error("Not found");
+
     await ctx.db.delete(args.noteId);
   },
 });
 
 export const search = query({
-  args: { query: v.string() },
+  args: { query: v.string(), token: v.string() },
   handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return [];
+
+    const now = Date.now();
     return await ctx.db
       .query("notes")
       .withSearchIndex("search_content", (q) => q.search("content", args.query))
-      .take(20);
+      .take(20)
+      .then((notes) =>
+        notes.filter((n) => n.userId === session.userId && (!n.expiresAt || n.expiresAt > now))
+      );
   },
 });
 
 export const getAllTags = query({
-  handler: async (ctx) => {
-    const notes = await ctx.db.query("notes").collect();
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return [];
+
+    const now = Date.now();
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_user", (q) => q.eq("userId", session.userId))
+      .collect()
+      .then((ns) => ns.filter((n) => !n.expiresAt || n.expiresAt > now));
     const tagCounts: Record<string, number> = {};
     for (const note of notes) {
       for (const tag of note.tags) {
@@ -96,34 +168,45 @@ export const getAllTags = query({
   },
 });
 
-export const migrateRemoveCompiled = mutation({
-  handler: async (ctx) => {
-    const notes = await ctx.db.query("notes").collect();
-    for (const note of notes) {
-      if ("compiled" in note) {
-        await ctx.db.replace(note._id, {
-          title: note.title,
-          content: note.content,
-          excerpt: note.excerpt,
-          tags: note.tags,
-          folderId: note.folderId,
-          isPinned: note.isPinned ?? false,
-          isPublished: note.isPublished,
-          publishedSlug: note.publishedSlug,
-          createdAt: note.createdAt,
-          updatedAt: note.updatedAt,
-        });
-      }
-    }
+export const listByTag = query({
+  args: { tag: v.string(), token: v.string() },
+  handler: async (ctx, args) => {
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) return [];
+
+    const now = Date.now();
+    return await ctx.db
+      .query("notes")
+      .withIndex("by_user", (q) => q.eq("userId", session.userId))
+      .collect()
+      .then((notes) =>
+        notes.filter((n) => n.tags.includes(args.tag) && (!n.expiresAt || n.expiresAt > now))
+      );
   },
 });
 
-export const listByTag = query({
-  args: { tag: v.string() },
+export const cleanupExpired = mutation({
+  args: { token: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const session = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!session || session.expiresAt < Date.now()) throw new Error("Not authenticated");
+
+    const now = Date.now();
+    const expired = await ctx.db
       .query("notes")
+      .withIndex("by_user", (q) => q.eq("userId", session.userId))
       .collect()
-      .then((notes) => notes.filter((n) => n.tags.includes(args.tag)));
+      .then((ns) => ns.filter((n) => n.expiresAt && n.expiresAt <= now));
+
+    for (const note of expired) {
+      await ctx.db.delete(note._id);
+    }
+    return { deleted: expired.length };
   },
 });

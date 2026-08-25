@@ -9,8 +9,10 @@
  */
 
 import type * as ai from "../ai.js";
+import type * as auth from "../auth.js";
 import type * as folders from "../folders.js";
 import type * as notes from "../notes.js";
+import type * as pairing from "../pairing.js";
 
 import type {
   ApiFromModules,
@@ -20,8 +22,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ai: typeof ai;
+  auth: typeof auth;
   folders: typeof folders;
   notes: typeof notes;
+  pairing: typeof pairing;
 }>;
 
 /**

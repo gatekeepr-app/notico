@@ -3,15 +3,16 @@ import { api } from "../../../convex/_generated/api";
 import { FileTree } from "../sidebar/FileTree";
 import { TagList } from "../sidebar/TagList";
 import { SearchOverlay } from "../sidebar/SearchOverlay";
+import { useAuth } from "../auth/AuthProvider";
 import { useState } from "react";
 import {
   Plus, Search, FolderPlus, X,
-  Calendar, Settings, FileText, Clock,
+  Calendar, Settings, FileText, Clock, User,
 } from "lucide-react";
 import type { NoteId } from "../../types";
 import { formatDate } from "../../lib/utils";
 
-type View = "notes" | "editor" | "search" | "settings" | "calendar";
+type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
 
 interface SidebarProps {
   open: boolean;
@@ -25,19 +26,21 @@ interface SidebarProps {
 }
 
 export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewChange, activeNoteId }: SidebarProps) {
+  const { token } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const allNotes = useQuery(api.notes.list, {});
-  const taggedNotes = useQuery(api.notes.listByTag, { tag: activeTag ?? "" });
+  const allNotes = useQuery(api.notes.list, token ? { token } : "skip");
+  const taggedNotes = useQuery(api.notes.listByTag, token && activeTag ? { tag: activeTag, token } : "skip");
   const isTagged = activeTag !== null;
   const displayNotes = isTagged ? (taggedNotes ?? []) : (allNotes ?? []);
-  const tags = useQuery(api.notes.getAllTags) ?? [];
+  const tags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
   const folders = useQuery(api.folders.list, {});
   const createNote = useMutation(api.notes.create);
   const createFolder = useMutation(api.folders.create);
 
   const handleNewNote = async () => {
-    const id = await createNote({ title: "Untitled" });
+    if (!token) return;
+    const id = await createNote({ title: "Untitled", token });
     onSelectNote(id);
   };
 
@@ -60,6 +63,7 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
     { id: "notes" as View, label: "Notes", icon: FileText },
     { id: "calendar" as View, label: "Calendar", icon: Calendar },
     { id: "settings" as View, label: "Settings", icon: Settings },
+    { id: "profile" as View, label: "Profile", icon: User },
   ];
 
   const content = (

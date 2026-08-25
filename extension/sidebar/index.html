@@ -12,7 +12,7 @@
         color: #1d1d1f;
         font-size: 14px;
       }
-      .container { padding: 12px; display: flex; flex-direction: column; min-height: 100vh; }
+      .container { padding: 12px; display: flex; flex-direction: column; height: 100vh; }
       h1 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
       .kb-hint {
         font-size: 10px;
@@ -22,7 +22,7 @@
       }
       textarea {
         width: 100%;
-        min-height: 80px;
+        min-height: 120px;
         border: 1px solid #e5e5ea;
         border-radius: 8px;
         padding: 8px;
@@ -31,10 +31,10 @@
         resize: vertical;
         outline: none;
       }
-      textarea:focus { border-color: #5e6ad2; }
+      textarea:focus { border-color: #8B5CF6; }
       .btn {
         margin-top: 8px;
-        background: #5e6ad2;
+        background: #8B5CF6;
         color: white;
         border: none;
         border-radius: 8px;
@@ -44,12 +44,12 @@
         cursor: pointer;
         width: 100%;
       }
-      .btn:hover { background: #4c5ab5; }
+      .btn:hover { background: #7C3AED; }
       .btn:disabled { opacity: 0.5; cursor: default; }
       .btn-secondary {
         margin-top: 8px;
         background: transparent;
-        color: #5e6ad2;
+        color: #8B5CF6;
         border: 1px solid #e5e5ea;
         border-radius: 8px;
         padding: 6px 12px;
@@ -57,6 +57,18 @@
         cursor: pointer;
         width: 100%;
       }
+      .btn-danger {
+        margin-top: 8px;
+        background: transparent;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 11px;
+        cursor: pointer;
+        width: 100%;
+      }
+      .btn-danger:hover { background: #fef2f2; }
       .note-list { margin-top: 12px; flex: 1; overflow-y: auto; }
       .note-item {
         padding: 8px;
@@ -70,14 +82,15 @@
       .tag {
         display: inline-block;
         font-size: 10px;
-        background: #eef0fa;
-        color: #5e6ad2;
+        background: #EDE9FE;
+        color: #8B5CF6;
         padding: 1px 6px;
         border-radius: 4px;
         margin-top: 4px;
         margin-right: 2px;
       }
       .status { font-size: 11px; color: #86868b; margin-top: 6px; }
+      .status.error { color: #ef4444; }
       .config { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e5ea; }
       .config input {
         width: 100%;
@@ -88,141 +101,67 @@
         outline: none;
         margin-top: 4px;
       }
-      .config input:focus { border-color: #5e6ad2; }
+      .config input:focus { border-color: #8B5CF6; }
       .config label { font-size: 11px; font-weight: 500; color: #86868b; }
+      .pair-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 16px; text-align: center; }
+      .pair-icon { width: 48px; height: 48px; border-radius: 12px; background: #8B5CF6; display: flex; align-items: center; justify-content: center; }
+      .pair-icon svg { width: 24px; height: 24px; color: white; }
+      .pair-wrap h2 { font-size: 16px; font-weight: 600; }
+      .pair-wrap p { font-size: 12px; color: #86868b; max-width: 240px; line-height: 1.4; }
+      .pair-input {
+        width: 200px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        font-family: "SF Mono", "Fira Code", monospace;
+        border: 2px solid #e5e5ea;
+        border-radius: 10px;
+        padding: 10px;
+        outline: none;
+        text-transform: uppercase;
+      }
+      .pair-input:focus { border-color: #8B5CF6; }
+      .paired-bar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 8px 12px; background: #f0fdf4; border: 1px solid #bbf7d0;
+        border-radius: 8px; margin-bottom: 8px;
+      }
+      .paired-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+      .paired-bar span { font-size: 12px; color: #166534; font-weight: 500; }
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1>Notico</h1>
-      <div class="kb-hint">Cmd+Shift+N to clip from any page</div>
-      <textarea id="note-input" placeholder="Quick note..."></textarea>
-      <button class="btn" id="save-btn">Save Note</button>
-      <div class="status" id="status"></div>
-      <div class="note-list" id="note-list"></div>
-
-      <div class="config">
-        <label>Convex Deployment URL</label>
-        <input type="url" id="convex-url" placeholder="https://your-project.convex.cloud" />
-        <button class="btn-secondary" id="save-config-btn">Save URL</button>
-        <div class="status" id="config-status"></div>
+    <div id="pair-screen" class="container" style="display: none;">
+      <div class="pair-wrap">
+        <div class="pair-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+        </div>
+        <h2>Pair Extension</h2>
+        <p>Generate a pairing code from the Notico website (Profile page) and paste it below.</p>
+        <input id="pair-code-input" class="pair-input" type="text" maxlength="6" placeholder="XXXXXX" autocomplete="off" />
+        <button class="btn" id="pair-btn" style="width: 200px;">Pair</button>
+        <div class="status error" id="pair-status"></div>
       </div>
     </div>
-    <script>
-      async function sendMessage(msg) {
-        return new Promise((resolve, reject) => {
-          chrome.runtime.sendMessage(msg, (response) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message));
-            } else {
-              resolve(response);
-            }
-          });
-        });
-      }
 
-      async function getCurrentTabInfo() {
-        try {
-          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-          if (tab?.url && !tab.url.startsWith("chrome://") && !tab.url.startsWith("about:")) {
-            const { id, url, title } = tab;
-            // Try to get selected text from the page
-            try {
-              const results = await chrome.scripting.executeScript({
-                target: { tabId: id },
-                func: () => window.getSelection()?.toString().trim() || "",
-              });
-              const selection = results?.[0]?.result || "";
-              return { url, title, selection };
-            } catch {
-              return { url, title, selection: "" };
-            }
-          }
-        } catch {}
-        return null;
-      }
+    <div id="main-screen" class="container" style="display: none;">
+      <h1>Notico</h1>
+      <div class="kb-hint">Paste anything. Saves for 10 min. Cmd+Enter to save.</div>
+      <div class="paired-bar">
+        <span class="dot"></span>
+        <span>Paired</span>
+      </div>
+      <textarea id="note-input" placeholder="Paste or type something..."></textarea>
+      <button class="btn" id="save-btn">Save Note</button>
+      <div class="status" id="save-status"></div>
+      <div class="note-list" id="note-list"></div>
+      <button class="btn-danger" id="unpair-btn">Unpair Extension</button>
+    </div>
 
-      async function loadNotes() {
-        try {
-          const res = await sendMessage({ type: "GET_NOTES" });
-          if (res.success) {
-            renderNotes(res.notes);
-          }
-        } catch (e) {
-          document.getElementById("status").textContent = "Could not load notes";
-        }
-      }
-
-      function renderNotes(notes) {
-        const list = document.getElementById("note-list");
-        list.innerHTML = notes.slice(0, 10).map(n =>
-          `<div class="note-item">
-            <h3>${n.title || "Untitled"}</h3>
-            <p>${(n.content || "").replace(/[#*[\]>]/g, "").slice(0, 60)}</p>
-            ${n.tags && n.tags.length ? n.tags.map(t => `<span class="tag">${t}</span>`).join("") : ""}
-          </div>`
-        ).join("");
-      }
-
-      document.getElementById("save-btn").onclick = async () => {
-        const input = document.getElementById("note-input");
-        const content = input.value.trim();
-        if (!content) return;
-        const btn = document.getElementById("save-btn");
-        btn.disabled = true;
-        btn.textContent = "Saving...";
-        try {
-          const title = content.split("\n")[0].replace(/^#\s*/, "").slice(0, 40) || "Quick note";
-          const res = await sendMessage({ type: "SAVE_QUICK_NOTE", title, content });
-          if (res.success) {
-            input.value = "";
-            document.getElementById("status").textContent = "Saved!";
-            loadNotes();
-          } else {
-            document.getElementById("status").textContent = "Failed: " + (res.error || "unknown");
-          }
-        } catch (e) {
-          document.getElementById("status").textContent = "Error: " + e.message;
-        }
-        btn.disabled = false;
-        btn.textContent = "Save Note";
-      };
-
-      document.getElementById("save-config-btn").onclick = async () => {
-        const url = document.getElementById("convex-url").value.trim();
-        if (!url) return;
-        try {
-          const res = await sendMessage({ type: "SET_CONVEX_URL", url });
-          document.getElementById("config-status").textContent = res.success ? "URL saved!" : "Failed: " + (res.error || "unknown");
-        } catch (e) {
-          document.getElementById("config-status").textContent = "Error: " + e.message;
-        }
-      };
-
-      (async () => {
-        try {
-          const res = await sendMessage({ type: "GET_CONVEX_URL" });
-          if (res.success) {
-            document.getElementById("convex-url").value = res.url;
-          }
-        } catch {}
-        loadNotes();
-
-        // Pre-fill with current page context
-        const tabInfo = await getCurrentTabInfo();
-        if (tabInfo) {
-          const input = document.getElementById("note-input");
-          const preamble = `# [${tabInfo.title}](${tabInfo.url})\n\n`;
-          if (tabInfo.selection) {
-            input.value = preamble + `> ${tabInfo.selection}\n\n`;
-          } else {
-            input.value = preamble;
-          }
-          input.focus();
-          // Move cursor to end
-          input.setSelectionRange(input.value.length, input.value.length);
-        }
-      })();
-    </script>
+    <script src="app.js"></script>
   </body>
 </html>

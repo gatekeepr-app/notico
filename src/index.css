@@ -3,9 +3,9 @@
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "SF Mono", "Fira Code", "JetBrains Mono", monospace;
-  --color-accent: #5e6ad2;
-  --color-accent-hover: #4c5ab5;
-  --color-accent-light: #eef0fa;
+  --color-accent: #8B5CF6;
+  --color-accent-hover: #7C3AED;
+  --color-accent-light: #EDE9FE;
   --color-surface: #ffffff;
   --color-surface-subtle: #fafafa;
   --color-border: #e5e5ea;
@@ -18,9 +18,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  --color-accent: #7c86e0;
-  --color-accent-hover: #949cf0;
-  --color-accent-light: #2d2d50;
+  --color-accent: #8B5CF6;
+  --color-accent-hover: #A78BFA;
+  --color-accent-light: #2D2055;
   --color-surface: #1a1a2e;
   --color-surface-subtle: #16162a;
   --color-border: #2e2e4a;

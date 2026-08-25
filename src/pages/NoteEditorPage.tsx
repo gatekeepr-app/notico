@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import TurndownService from "turndown";
 import { marked } from "marked";
 import { useToast } from "../components/Toast";
+import { useAuth } from "../components/auth/AuthProvider";
 import type { NoteId } from "../types";
 import type { SaveState } from "../components/editor/SaveIndicator";
 
@@ -22,8 +23,9 @@ interface NoteEditorPageProps {
 }
 
 export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectNote }: NoteEditorPageProps) {
-  const note = useQuery(api.notes.get, { noteId });
-  const allTags = useQuery(api.notes.getAllTags) ?? [];
+  const { token } = useAuth();
+  const note = useQuery(api.notes.get, token ? { noteId, token } : "skip");
+  const allTags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
   const updateNote = useMutation(api.notes.update);
   const createNote = useMutation(api.notes.create);
   const [title, setTitle] = useState("");
@@ -61,6 +63,7 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
   }, [note, mounted]);
 
   const save = useCallback(async (currentTitle: string, currentMdx: string, currentTags: string[], currentPinned: boolean, currentPublished: boolean) => {
+    if (!token) return;
     if (!currentTitle.trim() && !currentMdx.trim()) return;
     setSaveState("saving");
     try {
@@ -71,6 +74,7 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
         tags: currentTags,
         isPinned: currentPinned,
         isPublished: currentPublished,
+        token,
       });
       if (mountedRef.current) setSaveState("saved");
       toast("Note saved");
@@ -78,7 +82,7 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
       if (mountedRef.current) setSaveState("idle");
       toast("Unable to save", "error");
     }
-  }, [noteId, updateNote, toast]);
+  }, [noteId, updateNote, toast, token]);
 
   const scheduleSave = useCallback((newTitle: string, newMdx: string, newTags: string[], newPinned: boolean, newPublished: boolean) => {
     setSaveState("unsaved");
@@ -137,11 +141,13 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
   }, [html, mdx]);
 
   const handleCreateFromTemplate = useCallback(async (templateTitle: string, content: string) => {
-    const id = await createNote({ title: templateTitle, content });
+    if (!token) return;
+    const id = await createNote({ title: templateTitle, content, token });
     onSelectNote(id);
-  }, [createNote, onSelectNote]);
+  }, [createNote, onSelectNote, token]);
 
   const handleImportFile = useCallback(async (content: string) => {
+    if (!token) return;
     const lines = content.split("\n");
     const firstLine = lines[0]?.replace(/^#\s*/, "").trim() || "Imported";
     setTitle(firstLine);
@@ -150,7 +156,7 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
     setSaveState("unsaved");
     clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => save(firstLine, content, tags, pinned, published), 500);
-  }, [tags, pinned, published, save]);
+  }, [tags, pinned, published, save, token]);
 
   useEffect(() => {
     return () => clearTimeout(saveTimer.current);

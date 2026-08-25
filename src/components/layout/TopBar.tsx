@@ -1,4 +1,4 @@
-import { Menu, ChevronLeft, Eye, EyeOff, Sun, Moon } from "lucide-react";
+import { Menu, ChevronLeft, Eye, EyeOff, Sun, Moon, User } from "lucide-react";
 
 interface TopBarProps {
   sidebarOpen: boolean;
@@ -10,6 +10,7 @@ interface TopBarProps {
   onTogglePreview: () => void;
   theme: "light" | "dark";
   onToggleTheme: () => void;
+  onProfile: () => void;
 }
 
 export function TopBar({
@@ -21,6 +22,7 @@ export function TopBar({
   onTogglePreview,
   theme,
   onToggleTheme,
+  onProfile,
 }: TopBarProps) {
   return (
     <header className="flex items-center justify-between h-11 px-3 bg-[var(--color-surface)] border-b border-[var(--color-border-subtle)] shrink-0">
@@ -60,6 +62,17 @@ export function TopBar({
             {previewOpen ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         )}
+        <button
+          onClick={onProfile}
+          className={`rounded-lg p-1.5 transition-colors ${
+            view === "profile"
+              ? "text-[var(--color-accent)] bg-[var(--color-accent-light)]"
+              : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)]"
+          }`}
+          title="Profile"
+        >
+          <User size={16} />
+        </button>
       </div>
     </header>
   );

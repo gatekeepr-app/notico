@@ -3,7 +3,6 @@ import { SourceEditor } from "./SourceEditor";
 import { TagInput } from "./TagInput";
 import { PinButton } from "./PinButton";
 import { BacklinksPanel } from "./BacklinksPanel";
-import { AIActions } from "./AIActions";
 import { SaveIndicator } from "./SaveIndicator";
 import { NoteTemplates } from "./NoteTemplates";
 import { DraggableSplitPane } from "./DraggableSplitPane";
@@ -74,15 +73,6 @@ export function EditorPane({
   const wordCount = html.replace(/<[^>]*>/g, "").trim()
     ? html.replace(/<[^>]*>/g, "").trim().split(/\s+/).length
     : 0;
-
-  const handleAiResult = (text: string) => {
-    if (richText) {
-      const newHtml = html + `<p><em>${text}</em></p>`;
-      onHtmlChange(newHtml);
-    } else {
-      onMdxChange(mdx + `\n\n> ${text}\n`);
-    }
-  };
 
   const handleImportClick = useCallback(() => {
     importRef.current?.click();
@@ -172,7 +162,6 @@ export function EditorPane({
           {wordCount} {wordCount === 1 ? "word" : "words"}
         </span>
         <div className="flex items-center gap-2">
-          <AIActions content={richText ? html : mdx} onResult={handleAiResult} />
           <div className="flex items-center gap-0.5">
             <button
               onClick={handleImportClick}

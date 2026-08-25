@@ -1,5 +1,6 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { useAuth } from "../auth/AuthProvider";
 import { Tag } from "lucide-react";
 
 interface TagListProps {
@@ -8,7 +9,8 @@ interface TagListProps {
 }
 
 export function TagList({ activeTag, onSelectTag }: TagListProps) {
-  const tags = useQuery(api.notes.getAllTags) ?? [];
+  const { token } = useAuth();
+  const tags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
 
   return (
     <div className="space-y-0.5">

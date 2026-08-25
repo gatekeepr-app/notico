@@ -1,0 +1,46 @@
+# Notico — Todo
+
+## Done
+
+- [x] Auth system (signup, login, logout, token-based)
+- [x] Extension quick add (paste → save → 10-min TTL → shows in PWA)
+- [x] Extension pairing via 6-char codes
+- [x] PWA notes list with real-time Convex sync
+- [x] Note editor with backlinks
+- [x] Calendar view
+- [x] Settings page (theme, shortcuts)
+- [x] Landing page with hero + features + auth modal
+- [x] Profile page with extension pairing
+- [x] Mobile nav + responsive layout basics
+- [x] Dark mode support
+- [x] PWA icons (192, 512)
+- [x] Quick switcher (Cmd+K)
+
+## In Progress
+
+- [ ] Extension React sidebar rebuild (Step 1.1)
+- [ ] Auth — user-scoped notes (Step 2.1)
+
+## Next
+
+### Phase 1: Extension
+
+- [ ] **1.1** Extension React sidebar — Vite build, shared Tailwind tokens
+- [ ] **1.2** Quick add features — tag picker, folder selector, templates, search
+- [ ] **1.3** Clip enhancements — rich HTML, full page, image clip, clip-to-existing
+- [ ] **1.4** Extension polish — dark mode, error states, publish prep
+
+### Phase 2: PWA / Website
+
+- [ ] **2.1** Auth hardening — user-scoped queries, Convex Auth integration
+- [ ] **2.2** Landing page polish — responsive, social proof, footer
+- [ ] **2.3** Responsive shell — breakpoints, mobile overlays, touch gestures
+- [ ] **2.4** PWA hardening — offline fallback, workbox, install prompt, push notifications
+- [ ] **2.5** User settings — per-user preferences, data export, theme sync
+
+## Backlog
+
+- [ ] Note sharing (public links)
+- [ ] AI features (re-add if needed)
+- [ ] Firefox / Edge extension testing
+- [ ] Chrome Web Store publish

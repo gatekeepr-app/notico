@@ -1,5 +1,6 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { useAuth } from "../auth/AuthProvider";
 import { ArrowLeftFromLine, FileText } from "lucide-react";
 import type { NoteId } from "../../types";
 
@@ -9,8 +10,9 @@ interface BacklinksPanelProps {
 }
 
 export function BacklinksPanel({ noteId, onSelectNote }: BacklinksPanelProps) {
-  const currentNote = useQuery(api.notes.get, { noteId });
-  const allNotes = useQuery(api.notes.list, {}) ?? [];
+  const { token } = useAuth();
+  const currentNote = useQuery(api.notes.get, token ? { noteId, token } : "skip");
+  const allNotes = useQuery(api.notes.list, token ? { token } : "skip") ?? [];
 
   if (!currentNote) return null;
 

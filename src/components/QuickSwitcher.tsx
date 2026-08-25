@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useAuth } from "../components/auth/AuthProvider";
 import { Search, FileText, Hash } from "lucide-react";
 import type { NoteId } from "../types";
 
@@ -10,7 +11,8 @@ interface QuickSwitcherProps {
 }
 
 export function QuickSwitcher({ onSelectNote, onClose }: QuickSwitcherProps) {
-  const notes = useQuery(api.notes.list, {}) ?? [];
+  const { token } = useAuth();
+  const notes = useQuery(api.notes.list, token ? { token } : "skip") ?? [];
   const [query, setQuery] = useState("");
   const [selectedIdx, setSelectedIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);

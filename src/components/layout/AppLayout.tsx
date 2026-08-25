@@ -1,4 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
+import { useAuth } from "../auth/AuthProvider";
+import { LandingPage } from "../../pages/LandingPage";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
 import { TopBar } from "./TopBar";
@@ -7,15 +9,17 @@ import { NotesPage } from "../../pages/NotesPage";
 import { NoteEditorPage } from "../../pages/NoteEditorPage";
 import { CalendarPage } from "../../pages/CalendarPage";
 import { SettingsPage } from "../../pages/SettingsPage";
+import { ProfilePage } from "../../pages/ProfilePage";
 import { QuickSwitcher } from "../QuickSwitcher";
 import { KeyboardShortcutsModal } from "../editor/KeyboardShortcutsModal";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { NoteId } from "../../types";
 
-type View = "notes" | "editor" | "search" | "settings" | "calendar";
+type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
 
 export function AppLayout() {
+  const { user, token, loading } = useAuth();
   const [view, setView] = useState<View>("notes");
   const [activeNoteId, setActiveNoteId] = useState<NoteId | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,13 +47,14 @@ export function AppLayout() {
   }, []);
 
   const handleDailyNote = useCallback(async () => {
+    if (!token) return;
     const today = new Date().toISOString().slice(0, 10);
     const title = `Daily Note — ${today}`;
-    const id = await createNote({ title });
+    const id = await createNote({ title, token });
     setActiveNoteId(id);
     setView("editor");
     setSidebarOpen(false);
-  }, [createNote]);
+  }, [createNote, token]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -68,6 +73,7 @@ export function AppLayout() {
       if ((e.metaKey || e.ctrlKey) && e.key === "1") { e.preventDefault(); setView("notes"); }
       if ((e.metaKey || e.ctrlKey) && e.key === "2") { e.preventDefault(); setView("calendar"); }
       if ((e.metaKey || e.ctrlKey) && e.key === "3") { e.preventDefault(); setView("settings"); }
+      if ((e.metaKey || e.ctrlKey) && e.key === "4") { e.preventDefault(); setView("profile"); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -85,13 +91,26 @@ export function AppLayout() {
   }, []);
 
   const handleQuickAdd = useCallback(async () => {
-    const id = await createNote({ title: "Untitled" });
+    if (!token) return;
+    const id = await createNote({ title: "Untitled", token });
     openNote(id);
-  }, [createNote, openNote]);
+  }, [createNote, openNote, token]);
 
   const toggleTheme = useCallback(() => {
     setTheme((t) => (t === "dark" ? "light" : "dark"));
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-dvh items-center justify-center bg-[var(--color-surface-subtle)]">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-accent)]" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LandingPage />;
+  }
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-[var(--color-surface-subtle)]">
@@ -117,11 +136,12 @@ export function AppLayout() {
           onTogglePreview={() => setPreviewOpen(!previewOpen)}
           theme={theme}
           onToggleTheme={toggleTheme}
+          onProfile={() => setView("profile")}
         />
 
         <main className="flex-1 overflow-hidden bg-[var(--color-surface-subtle)]">
-          {view === "notes" && <NotesPage onSelectNote={openNote} />}
-          {view === "editor" && activeNoteId && (
+          {view === "notes" && token && <NotesPage onSelectNote={openNote} />}
+          {view === "editor" && activeNoteId && token && (
             <NoteEditorPage
               noteId={activeNoteId}
               previewOpen={previewOpen}
@@ -129,15 +149,16 @@ export function AppLayout() {
               onSelectNote={openNote}
             />
           )}
-          {view === "calendar" && <CalendarPage onSelectNote={openNote} />}
+          {view === "calendar" && token && <CalendarPage onSelectNote={openNote} />}
           {view === "settings" && <SettingsPage />}
+          {view === "profile" && <ProfilePage />}
         </main>
       </div>
 
       {view === "notes" && isMobile && <FAB onClick={handleQuickAdd} />}
       <MobileNav view={view} onViewChange={setView} />
 
-      {quickSwitcherOpen && (
+      {quickSwitcherOpen && token && (
         <QuickSwitcher
           onSelectNote={(id) => { openNote(id); setQuickSwitcherOpen(false); }}
           onClose={() => setQuickSwitcherOpen(false)}

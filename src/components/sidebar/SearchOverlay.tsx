@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { useAuth } from "../auth/AuthProvider";
 import { Search, FileText, X, Hash } from "lucide-react";
 import { formatDate } from "../../lib/utils";
 import type { NoteId } from "../../types";
@@ -11,10 +12,11 @@ interface SearchOverlayProps {
 }
 
 export function SearchOverlay({ onClose, onSelectNote }: SearchOverlayProps) {
+  const { token } = useAuth();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const allNotes = useQuery(api.notes.list, {}) ?? [];
-  const searchResults = useQuery(api.notes.search, { query }) ?? [];
+  const allNotes = useQuery(api.notes.list, token ? { token } : "skip") ?? [];
+  const searchResults = useQuery(api.notes.search, token ? { query, token } : "skip") ?? [];
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -44,16 +46,6 @@ export function SearchOverlay({ onClose, onSelectNote }: SearchOverlayProps) {
         }),
       ].slice(0, 20)
     : [];
-
-  const highlightMatches = (text: string) => {
-    if (!queryLower) return text;
-    const idx = text.toLowerCase().indexOf(queryLower);
-    if (idx === -1) return text;
-    const before = text.slice(0, idx);
-    const match = text.slice(idx, idx + queryLower.length);
-    const after = text.slice(idx + queryLower.length);
-    return `${before}**${match}**${after}`;
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/20 backdrop-blur-sm">

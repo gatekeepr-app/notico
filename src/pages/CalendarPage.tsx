@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useAuth } from "../components/auth/AuthProvider";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { formatDate } from "../lib/utils";
 import type { NoteId } from "../types";
@@ -13,7 +14,8 @@ interface CalendarPageProps {
 }
 
 export function CalendarPage({ onSelectNote }: CalendarPageProps) {
-  const notes = useQuery(api.notes.list, {}) ?? [];
+  const { token } = useAuth();
+  const notes = useQuery(api.notes.list, token ? { token } : "skip") ?? [];
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
