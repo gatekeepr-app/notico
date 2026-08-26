@@ -43,7 +43,7 @@ export function TopBar({
         ) : (
           <button
             onClick={onToggleSidebar}
-            className="rounded-lg p-2 text-[var(--color-text-secondary)] transition-colors active:bg-[var(--color-surface-subtle)]"
+            className="hidden rounded-lg p-2 text-[var(--color-text-secondary)] transition-colors active:bg-[var(--color-surface-subtle)] md:block"
           >
             <Menu size={20} />
           </button>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { Editor } from "@tiptap/core";
 import {
   Heading1, Heading2, Heading3, List, ListOrdered,
-  CheckSquare, Quote, Code, Minus,
+  CheckSquare,
 } from "lucide-react";
 
 const COMMANDS = [
@@ -12,9 +12,6 @@ const COMMANDS = [
   { id: "bullet", label: "Bullet List", icon: List, type: "bulletList", keywords: "ul list bullet" },
   { id: "ordered", label: "Numbered List", icon: ListOrdered, type: "orderedList", keywords: "ol list numbered" },
   { id: "task", label: "Task List", icon: CheckSquare, type: "taskList", keywords: "task checklist todo" },
-  { id: "quote", label: "Blockquote", icon: Quote, type: "blockquote", keywords: "quote blockquote" },
-  { id: "code", label: "Code Block", icon: Code, type: "codeBlock", keywords: "code block pre" },
-  { id: "hr", label: "Divider", icon: Minus, type: "horizontalRule", keywords: "hr divider" },
 ];
 
 interface SlashMenuProps {
@@ -44,18 +41,12 @@ export function SlashMenu({ editor }: SlashMenuProps) {
     editor.chain().focus().run();
     if (cmd.type === "heading" && cmd.level) {
       editor.chain().focus().toggleHeading({ level: cmd.level as 1 | 2 | 3 }).run();
-    } else if (cmd.type === "horizontalRule") {
-      editor.chain().focus().setHorizontalRule().run();
     } else if (cmd.type === "bulletList") {
       editor.chain().focus().toggleBulletList().run();
     } else if (cmd.type === "orderedList") {
       editor.chain().focus().toggleOrderedList().run();
     } else if (cmd.type === "taskList") {
       editor.chain().focus().toggleTaskList().run();
-    } else if (cmd.type === "blockquote") {
-      editor.chain().focus().toggleBlockquote().run();
-    } else if (cmd.type === "codeBlock") {
-      editor.chain().focus().toggleCodeBlock().run();
     }
     setOpen(false);
     setQuery("");

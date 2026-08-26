@@ -6,8 +6,9 @@ import { BacklinksPanel } from "./BacklinksPanel";
 import { SaveIndicator } from "./SaveIndicator";
 import { NoteTemplates } from "./NoteTemplates";
 import { DraggableSplitPane } from "./DraggableSplitPane";
-import { FileText, Code, FileType, Download, X, Globe, GlobeOff } from "lucide-react";
+import { FileText, Code, FileType, Download, X, Globe, GlobeOff, Copy, Edit3, Trash2 } from "lucide-react";
 import { downloadAsMdx, downloadAsHtml } from "../../lib/export";
+import { sanitizeHtml } from "../../lib/sanitize";
 import type { NoteId } from "../../types";
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { SaveState } from "./SaveIndicator";
@@ -32,6 +33,9 @@ interface EditorPaneProps {
   onTogglePreview: () => void;
   onToggleMode: () => void;
   onTogglePublish: () => void;
+  onCopy: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
   onSelectNote: (id: NoteId) => void;
   onCreateFromTemplate: (title: string, content: string) => void;
   onImportFile: (content: string) => void;
@@ -57,6 +61,9 @@ export function EditorPane({
   onTogglePreview,
   onToggleMode,
   onTogglePublish,
+  onCopy,
+  onEdit,
+  onDelete,
   onSelectNote,
   onCreateFromTemplate,
   onImportFile,
@@ -119,7 +126,7 @@ export function EditorPane({
           placeholder="Untitled"
           className="w-full text-base md:text-lg font-semibold bg-transparent outline-none text-[var(--color-text)] placeholder:text-[var(--color-text-tertiary)]"
         />
-        <NoteTemplates onSelect={onCreateFromTemplate} />
+          <NoteTemplates onSelect={onCreateFromTemplate} />
         <button
           onClick={onTogglePublish}
           className={`flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-medium transition-colors shrink-0 ${
@@ -127,10 +134,10 @@ export function EditorPane({
               ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
               : "border border-[var(--color-border-subtle)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)]"
           }`}
-          title={published ? "Published" : "Unpublished"}
+          title={published ? "Shared note" : "Private note"}
         >
           {published ? <Globe size={12} /> : <GlobeOff size={12} />}
-          <span className="hidden sm:inline">{published ? "Published" : "Draft"}</span>
+          <span className="hidden sm:inline">{published ? "Shared" : "Private"}</span>
         </button>
         <button
           onClick={onToggleMode}
@@ -158,10 +165,31 @@ export function EditorPane({
         </div>
       </div>
       <div className="flex items-center justify-between px-3 md:px-5 py-1 md:py-1.5 border-t border-[var(--color-border-subtle)]">
-        <span className="text-[11px] text-[var(--color-text-tertiary)]">
-          {wordCount} {wordCount === 1 ? "word" : "words"}
-        </span>
+        <button
+          onClick={onCopy}
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
+        >
+          <Copy size={13} />
+          Copy
+        </button>
         <div className="flex items-center gap-2">
+          <span className="hidden sm:inline text-[11px] text-[var(--color-text-tertiary)]">
+            {wordCount} {wordCount === 1 ? "word" : "words"}
+          </span>
+          <button
+            onClick={onEdit}
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-medium text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-subtle)] transition-colors"
+          >
+            <Edit3 size={13} />
+            Edit
+          </button>
+          <button
+            onClick={onDelete}
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+          >
+            <Trash2 size={13} />
+            Delete
+          </button>
           <div className="flex items-center gap-0.5">
             <button
               onClick={handleImportClick}
@@ -206,7 +234,7 @@ export function EditorPane({
           {html ? (
             <div
               className="prose prose-sm max-w-none prose-headings:text-[var(--color-text)] prose-p:text-[var(--color-text-secondary)] prose-a:text-[var(--color-accent)] prose-code:text-sm prose-code:bg-[var(--color-surface-subtle)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-img:rounded-xl prose-blockquote:border-l-[var(--color-accent)] prose-blockquote:text-[var(--color-text-secondary)]"
-              dangerouslySetInnerHTML={{ __html: html }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
             />
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">

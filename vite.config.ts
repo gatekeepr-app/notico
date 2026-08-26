@@ -26,6 +26,18 @@ export default defineConfig({
         orientation: "portrait",
         start_url: "/",
         scope: "/",
+        shortcuts: [
+          { name: "New note", short_name: "New", url: "/?action=new", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+          { name: "Pair device", short_name: "Pair", url: "/?view=profile", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+        ],
+        share_target: {
+          action: "/",
+          method: "GET",
+          params: { title: "share_title", text: "share_text", url: "share_url" },
+        },
+        protocol_handlers: [
+          { protocol: "web+notico", url: "/?shared=%s" },
+        ],
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },

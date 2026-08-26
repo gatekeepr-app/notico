@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ToastProvider } from "./components/Toast";
 import { AuthProvider } from "./components/auth/AuthProvider";
+import { PwaManager } from "./components/PwaManager";
 import App from "./App";
 import "./index.css";
 
@@ -16,6 +17,7 @@ createRoot(document.getElementById("root")!).render(
       <ToastProvider>
         <AuthProvider>
           <App />
+          <PwaManager />
         </AuthProvider>
       </ToastProvider>
     </ConvexProvider>

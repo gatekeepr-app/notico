@@ -12,6 +12,8 @@ export default defineSchema({
   sessions: defineTable({
     userId: v.id("users"),
     token: v.string(),
+    deviceName: v.optional(v.string()),
+    createdAt: v.optional(v.number()),
     expiresAt: v.number(),
   }).index("by_token", ["token"]).index("by_user", ["userId"]),
 

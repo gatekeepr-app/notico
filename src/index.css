@@ -2,7 +2,8 @@
 
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "SF Mono", "Fira Code", "JetBrains Mono", monospace;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-sans);
   --color-accent: #8B5CF6;
   --color-accent-hover: #7C3AED;
   --color-accent-light: #EDE9FE;

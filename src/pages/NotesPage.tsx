@@ -6,6 +6,7 @@ import { useState, useCallback } from "react";
 import { useAuth } from "../components/auth/AuthProvider";
 import type { NoteId } from "../types";
 import { downloadAllAsZip } from "../lib/export";
+import { queueNoteOp } from "../lib/offlineNotes";
 
 interface NotesPageProps {
   onSelectNote: (id: NoteId) => void;
@@ -38,6 +39,10 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
 
   const handleCreate = async () => {
     if (!token) return;
+    if (!navigator.onLine) {
+      await queueNoteOp({ type: "create", title: "Untitled" });
+      return;
+    }
     const id = await createNote({ title: "Untitled", token });
     onSelectNote(id);
   };
@@ -45,6 +50,10 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
   const handleCreateDaily = async () => {
     if (!token) return;
     const today = new Date().toISOString().slice(0, 10);
+    if (!navigator.onLine) {
+      await queueNoteOp({ type: "create", title: `Daily Note — ${today}` });
+      return;
+    }
     const id = await createNote({ title: `Daily Note — ${today}`, token });
     onSelectNote(id);
   };
@@ -53,7 +62,8 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
     e.stopPropagation();
     if (!token) return;
     if (!confirm("Delete this note?")) return;
-    await deleteNote({ noteId, token });
+    if (!navigator.onLine) await queueNoteOp({ type: "remove", noteId });
+    else await deleteNote({ noteId, token });
   };
 
   const handleCopy = useCallback(async (e: React.MouseEvent, note: any) => {

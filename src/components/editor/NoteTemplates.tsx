@@ -82,7 +82,7 @@ export function NoteTemplates({ onSelect }: NoteTemplatesProps) {
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 mb-1 w-56 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl py-1 overflow-hidden z-50">
+        <div className="absolute left-0 top-full mt-1 w-56 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl py-1 overflow-hidden z-50">
           <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--color-border-subtle)]">
             <span className="text-[11px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">Templates</span>
             <button onClick={() => setOpen(false)} className="rounded p-0.5 text-[var(--color-text-tertiary)] hover:bg-[var(--color-surface-subtle)]">

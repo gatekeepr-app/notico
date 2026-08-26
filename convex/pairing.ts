@@ -57,7 +57,7 @@ function generateToken(): string {
 }
 
 export const claim = mutation({
-  args: { code: v.string() },
+  args: { code: v.string(), deviceName: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const pairing = await ctx.db
       .query("pairing_codes")
@@ -73,6 +73,8 @@ export const claim = mutation({
     await ctx.db.insert("sessions", {
       userId: pairing.userId,
       token,
+      deviceName: args.deviceName,
+      createdAt: Date.now(),
       expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
 

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useAuth } from "./AuthProvider";
-import { Mail, Lock, User, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Loader2, KeyRound } from "lucide-react";
 
 export function LoginPage() {
-  const { signup, login } = useAuth();
+  const { signup, login, loginWithCode } = useAuth();
   const [isSignup, setIsSignup] = useState(false);
+  const [useCode, setUseCode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,68 +18,86 @@ export function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      if (isSignup) {
+      if (useCode) {
+        await loginWithCode(code);
+      } else if (isSignup) {
         await signup(email, password, name || undefined);
       } else {
         await login(email, password);
       }
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      const message = String(err?.message || "");
+      setError(message.includes("Invalid") || message.includes("password") ? "Invalid email, password, or code" : "Unable to sign in");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-dvh flex items-center justify-center bg-[var(--color-surface-subtle)] p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--color-accent)] flex items-center justify-center mx-auto mb-4">
+    <div className="flex min-h-svh w-full items-center justify-center overflow-y-auto bg-[var(--color-surface-subtle)] px-4 py-8 sm:px-6">
+      <div className="w-full max-w-md rounded-[2rem] border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-5 shadow-xl shadow-black/5 sm:p-8">
+        <div className="mb-7 text-center sm:mb-8">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-accent)]">
             <span className="text-xl font-bold text-white">N</span>
           </div>
-          <h1 className="text-xl font-semibold text-[var(--color-text)]">
-            {isSignup ? "Create your account" : "Welcome back"}
+          <h1 className="text-balance text-2xl font-semibold text-[var(--color-text)] sm:text-3xl">
+            {useCode ? "Connect this device" : isSignup ? "Create your account" : "Welcome back"}
           </h1>
-          <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            {isSignup ? "Start taking notes with Notico" : "Sign in to your Notico account"}
+          <p className="mx-auto mt-2 max-w-xs text-sm leading-snug text-[var(--color-text-secondary)]">
+            {useCode ? "Use the code from your other phone" : isSignup ? "Start taking notes with Notico" : "Sign in to your Notico account"}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          {isSignup && (
+          {useCode ? (
             <div className="relative">
-              <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
+              <KeyRound size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
               <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Name (optional)"
-                className="w-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[var(--color-accent)] text-[var(--color-text)] placeholder:text-[var(--color-text-tertiary)] transition-colors"
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="Pairing code"
+                required
+                className="w-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] pl-10 pr-4 py-2.5 text-sm uppercase tracking-[0.25em] outline-none focus:border-[var(--color-accent)] text-[var(--color-text)] placeholder:tracking-normal placeholder:normal-case placeholder:text-[var(--color-text-tertiary)] transition-colors"
               />
             </div>
+          ) : (
+            <>
+              {isSignup && (
+                <div className="relative">
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name (optional)"
+                    className="w-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] py-3 pl-10 pr-4 text-base outline-none transition-colors placeholder:text-[var(--color-text-tertiary)] focus:border-[var(--color-accent)] sm:text-sm"
+                  />
+                </div>
+              )}
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="Email"
+                  required
+                  className="w-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] py-3 pl-10 pr-4 text-base outline-none transition-colors placeholder:text-[var(--color-text-tertiary)] focus:border-[var(--color-accent)] sm:text-sm"
+                />
+              </div>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
+                <input
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  placeholder="Password"
+                  required
+                  minLength={6}
+                  className="w-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] py-3 pl-10 pr-4 text-base outline-none transition-colors placeholder:text-[var(--color-text-tertiary)] focus:border-[var(--color-accent)] sm:text-sm"
+                />
+              </div>
+            </>
           )}
-          <div className="relative">
-            <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              placeholder="Email"
-              required
-              className="w-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[var(--color-accent)] text-[var(--color-text)] placeholder:text-[var(--color-text-tertiary)] transition-colors"
-            />
-          </div>
-          <div className="relative">
-            <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)]" />
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              placeholder="Password"
-              required
-              minLength={6}
-              className="w-full rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] pl-10 pr-4 py-2.5 text-sm outline-none focus:border-[var(--color-accent)] text-[var(--color-text)] placeholder:text-[var(--color-text-tertiary)] transition-colors"
-            />
-          </div>
 
           {error && (
             <p className="text-xs text-red-500 text-center">{error}</p>
@@ -86,22 +106,30 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-[var(--color-accent)] py-2.5 text-sm font-medium text-white hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
-            {isSignup ? "Sign up" : "Sign in"}
+            {useCode ? "Connect this device" : isSignup ? "Sign up" : "Sign in"}
           </button>
         </form>
 
-        <p className="text-center text-xs text-[var(--color-text-secondary)] mt-6">
-          {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+        <p className="mt-6 text-center text-xs text-[var(--color-text-secondary)]">
+          {useCode ? "Have your email and password?" : isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
           <button
-            onClick={() => { setIsSignup(!isSignup); setError(""); }}
+            onClick={() => { setUseCode(false); setIsSignup(useCode ? false : !isSignup); setError(""); }}
             className="text-[var(--color-accent)] hover:underline font-medium"
           >
-            {isSignup ? "Sign in" : "Sign up"}
+            {useCode || isSignup ? "Sign in" : "Sign up"}
           </button>
         </p>
+        {!isSignup && !useCode && (
+          <p className="mt-3 text-center text-xs text-[var(--color-text-secondary)]">
+            Connecting another phone?{" "}
+            <button onClick={() => { setUseCode(true); setError(""); }} className="text-[var(--color-accent)] hover:underline font-medium">
+              Use pairing code
+            </button>
+          </p>
+        )}
       </div>
     </div>
   );

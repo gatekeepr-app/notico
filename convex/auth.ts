@@ -20,6 +20,7 @@ export const signup = mutation({
     email: v.string(),
     password: v.string(),
     name: v.optional(v.string()),
+    deviceName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -40,6 +41,8 @@ export const signup = mutation({
     await ctx.db.insert("sessions", {
       userId,
       token,
+      deviceName: args.deviceName,
+      createdAt: Date.now(),
       expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
 
@@ -48,7 +51,7 @@ export const signup = mutation({
 });
 
 export const login = mutation({
-  args: { email: v.string(), password: v.string() },
+  args: { email: v.string(), password: v.string(), deviceName: v.optional(v.string()) },
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
@@ -63,6 +66,8 @@ export const login = mutation({
     await ctx.db.insert("sessions", {
       userId: user._id,
       token,
+      deviceName: args.deviceName,
+      createdAt: Date.now(),
       expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
     });
 
@@ -92,5 +97,31 @@ export const me = query({
     const user = await ctx.db.get(session.userId);
     if (!user) return null;
     return { userId: user._id, email: user.email, name: user.name };
+  },
+});
+
+export const listSessions = query({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const current = await ctx.db
+      .query("sessions")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!current || current.expiresAt < Date.now()) return [];
+
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_user", (q) => q.eq("userId", current.userId))
+      .collect();
+
+    return sessions
+      .filter((session) => session.expiresAt >= Date.now())
+      .map((session) => ({
+        id: session._id,
+        name: session.deviceName ?? "Mystery Blob",
+        current: session._id === current._id,
+        createdAt: session.createdAt ?? session._creationTime,
+      }))
+      .sort((a, b) => b.createdAt - a.createdAt);
   },
 });

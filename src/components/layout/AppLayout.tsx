@@ -14,6 +14,7 @@ import { QuickSwitcher } from "../QuickSwitcher";
 import { KeyboardShortcutsModal } from "../editor/KeyboardShortcutsModal";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { queueNoteOp } from "../../lib/offlineNotes";
 import type { NoteId } from "../../types";
 
 type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
@@ -141,9 +142,40 @@ export function AppLayout() {
 
   const handleQuickAdd = useCallback(async () => {
     if (!token) return;
+    if (!navigator.onLine) {
+      await queueNoteOp({ type: "create", title: "Untitled" });
+      return;
+    }
     const id = await createNote({ title: "Untitled", token });
     openNote(id);
   }, [createNote, openNote, token]);
+
+  useEffect(() => {
+    if (!token || !user) return;
+    const params = new URLSearchParams(window.location.search);
+    const shared = [params.get("share_title"), params.get("share_text"), params.get("share_url"), params.get("shared")]
+      .filter(Boolean)
+      .join("\n")
+      .trim();
+    const action = params.get("action");
+    const viewParam = params.get("view");
+
+    if (viewParam === "profile") setView("profile");
+    if (action === "new") void handleQuickAdd();
+    if (!shared) return;
+
+    const title = params.get("share_title") || "Shared to Notico";
+    const createShared = async () => {
+      if (navigator.onLine) {
+        const id = await createNote({ title, content: shared, token });
+        openNote(id);
+      } else {
+        await queueNoteOp({ type: "create", title, content: shared });
+      }
+      window.history.replaceState({}, "", window.location.pathname);
+    };
+    void createShared();
+  }, [createNote, handleQuickAdd, openNote, token, user]);
 
   const toggleTheme = useCallback(() => {
     setTheme((t) => (t === "dark" ? "light" : "dark"));
