@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "../auth/AuthProvider";
-import { LandingPage } from "../../pages/LandingPage";
 import { Sidebar } from "./Sidebar";
 import { MobileNav } from "./MobileNav";
 import { TopBar } from "./TopBar";
@@ -10,6 +9,7 @@ import { NoteEditorPage } from "../../pages/NoteEditorPage";
 import { CalendarPage } from "../../pages/CalendarPage";
 import { SettingsPage } from "../../pages/SettingsPage";
 import { ProfilePage } from "../../pages/ProfilePage";
+import { ProfileErrorBoundary } from "../ProfileErrorBoundary";
 import { QuickSwitcher } from "../QuickSwitcher";
 import { KeyboardShortcutsModal } from "../editor/KeyboardShortcutsModal";
 import { useMutation } from "convex/react";
@@ -20,7 +20,7 @@ import type { NoteId } from "../../types";
 type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
 
 export function AppLayout() {
-  const { user, token, loading } = useAuth();
+  const { user, token } = useAuth();
   const [view, setView] = useState<View>("notes");
   const [activeNoteId, setActiveNoteId] = useState<NoteId | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -181,22 +181,6 @@ export function AppLayout() {
     setTheme((t) => (t === "dark" ? "light" : "dark"));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex h-dvh items-center justify-center bg-[var(--color-surface-subtle)]">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-accent)]" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="h-dvh overflow-y-auto bg-[var(--color-surface-subtle)]">
-        <LandingPage />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-[var(--color-surface-subtle)]" style={{ height: "100dvh" }}>
       <div className="flex flex-1 min-h-0">
@@ -238,7 +222,7 @@ export function AppLayout() {
             )}
             {view === "calendar" && token && <CalendarPage onSelectNote={openNote} />}
             {view === "settings" && <SettingsPage />}
-            {view === "profile" && <ProfilePage />}
+            {view === "profile" && <ProfileErrorBoundary><ProfilePage /></ProfileErrorBoundary>}
           </main>
         </div>
       </div>

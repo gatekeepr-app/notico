@@ -6,18 +6,12 @@ import { useToast } from "./Toast";
 import { useAuth } from "./auth/AuthProvider";
 import { clearExpiredQueuedNoteOps, deleteQueuedNoteOp, getQueuedNoteOps } from "../lib/offlineNotes";
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
-
 export function PwaManager() {
   const { token } = useAuth();
   const { toast } = useToast();
   const createNote = useMutation(api.notes.create);
   const updateNote = useMutation(api.notes.update);
   const removeNote = useMutation(api.notes.remove);
-  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [updateReady, setUpdateReady] = useState<(() => Promise<void>) | null>(null);
 
   useEffect(() => {
@@ -31,15 +25,6 @@ export function PwaManager() {
       },
     });
   }, [toast]);
-
-  useEffect(() => {
-    const onBeforeInstall = (event: Event) => {
-      event.preventDefault();
-      setInstallPrompt(event as BeforeInstallPromptEvent);
-    };
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    return () => window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-  }, []);
 
   useEffect(() => {
     const sync = async () => {
@@ -65,21 +50,10 @@ export function PwaManager() {
     };
   }, [createNote, removeNote, toast, token, updateNote]);
 
-  if (!installPrompt && !updateReady) return null;
+  if (!updateReady) return null;
 
   return (
     <div className="fixed inset-x-3 bottom-18 z-50 mx-auto flex max-w-sm flex-col gap-2 md:bottom-4">
-      {installPrompt && (
-        <button
-          onClick={async () => {
-            await installPrompt.prompt();
-            setInstallPrompt(null);
-          }}
-          className="rounded-2xl bg-[#123d83] px-4 py-3 text-sm font-black text-white shadow-xl shadow-[#123d83]/20"
-        >
-          Install Notico
-        </button>
-      )}
       {updateReady && (
         <button
           onClick={() => void updateReady()}

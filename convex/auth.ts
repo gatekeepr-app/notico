@@ -75,6 +75,32 @@ export const login = mutation({
   },
 });
 
+export const resetPasswordWithCode = mutation({
+  args: { code: v.string(), password: v.string(), deviceName: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    if (args.password.length < 6) throw new Error("Password must be at least 6 characters");
+    const pairing = await ctx.db
+      .query("pairing_codes")
+      .withIndex("by_code", (q) => q.eq("code", args.code))
+      .unique();
+    if (!pairing || pairing.expiresAt < Date.now()) throw new Error("Invalid or expired code");
+
+    await ctx.db.patch(pairing.userId, { passwordHash: await hashPassword(args.password) });
+    await ctx.db.delete(pairing._id);
+
+    const token = generateToken();
+    await ctx.db.insert("sessions", {
+      userId: pairing.userId,
+      token,
+      deviceName: args.deviceName,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+    });
+
+    return { token };
+  },
+});
+
 export const logout = mutation({
   args: { token: v.string() },
   handler: async (ctx, args) => {

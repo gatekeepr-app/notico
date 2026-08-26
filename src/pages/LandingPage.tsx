@@ -59,9 +59,6 @@ export function LandingPage() {
           </button>
 
           <div className="hidden items-center gap-8 text-sm font-bold md:flex">
-            <a href="#how" className="hover:opacity-70">
-              How it works
-            </a>
             <a href="#uses" className="hover:opacity-70">
               Use cases
             </a>
@@ -99,13 +96,6 @@ export function LandingPage() {
         </nav>
         {mobileMenuOpen && (
           <div className="mx-5 mb-4 space-y-2 rounded-2xl border border-[#123d83]/20 bg-[#fff9ed] p-4 text-sm font-bold md:hidden">
-            <a
-              href="#how"
-              className="block py-2"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              How it works
-            </a>
             <a
               href="#uses"
               className="block py-2"
@@ -241,7 +231,7 @@ export function LandingPage() {
 
           <div
             id="how"
-            className="mt-16 overflow-hidden rounded-[2rem] border border-[#123d83]/15 bg-[#fff9ed]/60 p-5 shadow-xl shadow-[#123d83]/5 md:p-8"
+            className="hidden mt-16 overflow-hidden rounded-[2rem] border border-[#123d83]/15 bg-[#fff9ed]/60 p-5 shadow-xl shadow-[#123d83]/5 md:p-8"
           >
             <div className="grid gap-8 md:grid-cols-[0.42fr_0.58fr] md:gap-12">
               <div className="flex flex-col justify-between gap-10">

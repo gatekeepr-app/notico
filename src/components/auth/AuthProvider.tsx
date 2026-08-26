@@ -17,6 +17,7 @@ interface AuthContextType {
   signup: (email: string, password: string, name?: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   loginWithCode: (code: string) => Promise<void>;
+  resetPasswordWithCode: (code: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   signup: async () => {},
   login: async () => {},
   loginWithCode: async () => {},
+  resetPasswordWithCode: async () => {},
   logout: async () => {},
 });
 
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const signupMutation = useMutation(api.auth.signup);
   const loginMutation = useMutation(api.auth.login);
+  const resetPasswordMutation = useMutation(api.auth.resetPasswordWithCode);
   const claimCode = useMutation(api.pairing.claim);
   const logoutMutation = useMutation(api.auth.logout);
   const me = useQuery(api.auth.me, token ? { token } : "skip");
@@ -65,6 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(result.token);
   }, [claimCode]);
 
+  const resetPasswordWithCode = useCallback(async (code: string, password: string) => {
+    const result = await resetPasswordMutation({ code: code.trim().toUpperCase(), password, deviceName: getDeviceName() });
+    setStoredToken(result.token);
+    setToken(result.token);
+  }, [resetPasswordMutation]);
+
   const logout = useCallback(async () => {
     if (token) await logoutMutation({ token });
     clearStoredToken();
@@ -72,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token, logoutMutation]);
 
   return (
-    <AuthContext.Provider value={{ user: me ?? null, token, loading, signup, login, loginWithCode, logout }}>
+    <AuthContext.Provider value={{ user: me ?? null, token, loading, signup, login, loginWithCode, resetPasswordWithCode, logout }}>
       {children}
     </AuthContext.Provider>
   );
