@@ -7,13 +7,13 @@ import { useAuth } from "../auth/AuthProvider";
 import { useState } from "react";
 import {
   Plus, Search, FolderPlus, X,
-  Calendar, Settings, FileText, Clock, User, Pin, Hash,
+  Settings, FileText, Clock, User, Pin, Hash,
 } from "lucide-react";
 import type { NoteId } from "../../types";
 import { formatDate } from "../../lib/utils";
 import { FolderModal } from "../FolderModal";
 
-type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
+type View = "notes" | "editor" | "search" | "settings" | "profile";
 
 interface SidebarProps {
   open: boolean;
@@ -64,7 +64,6 @@ export function Sidebar({ open, mobileOpen, view, onClose, onSelectNote, onViewC
 
   const navItems = [
     { id: "notes" as View, label: "Notes", icon: FileText },
-    { id: "calendar" as View, label: "Calendar", icon: Calendar },
     { id: "settings" as View, label: "Settings", icon: Settings },
     { id: "profile" as View, label: "Profile", icon: User },
   ];

@@ -6,7 +6,6 @@ import { TopBar } from "./TopBar";
 import { FAB } from "./FAB";
 import { NotesPage } from "../../pages/NotesPage";
 import { NoteEditorPage } from "../../pages/NoteEditorPage";
-import { CalendarPage } from "../../pages/CalendarPage";
 import { SettingsPage } from "../../pages/SettingsPage";
 import { ProfilePage } from "../../pages/ProfilePage";
 import { ProfileErrorBoundary } from "../ProfileErrorBoundary";
@@ -17,7 +16,7 @@ import { api } from "../../../convex/_generated/api";
 import { queueNoteOp } from "../../lib/offlineNotes";
 import type { NoteId } from "../../types";
 
-type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
+type View = "notes" | "editor" | "search" | "settings" | "profile";
 
 export function AppLayout() {
   const { user, token } = useAuth();
@@ -78,9 +77,8 @@ export function AppLayout() {
         setShortcutsOpen(true);
       }
       if ((e.metaKey || e.ctrlKey) && e.key === "1") { e.preventDefault(); setView("notes"); }
-      if ((e.metaKey || e.ctrlKey) && e.key === "2") { e.preventDefault(); setView("calendar"); }
-      if ((e.metaKey || e.ctrlKey) && e.key === "3") { e.preventDefault(); setView("settings"); }
-      if ((e.metaKey || e.ctrlKey) && e.key === "4") { e.preventDefault(); setView("profile"); }
+      if ((e.metaKey || e.ctrlKey) && e.key === "2") { e.preventDefault(); setView("settings"); }
+      if ((e.metaKey || e.ctrlKey) && e.key === "3") { e.preventDefault(); setView("profile"); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -216,11 +214,9 @@ export function AppLayout() {
                 noteId={activeNoteId}
                 previewOpen={previewOpen}
                 onTogglePreview={() => setPreviewOpen(!previewOpen)}
-                onSelectNote={openNote}
                 onGoBack={goBack}
               />
             )}
-            {view === "calendar" && token && <CalendarPage onSelectNote={openNote} />}
             {view === "settings" && <SettingsPage />}
             {view === "profile" && <ProfileErrorBoundary><ProfilePage /></ProfileErrorBoundary>}
           </main>

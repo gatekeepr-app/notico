@@ -259,10 +259,12 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
                         <span className="text-[10px] text-[var(--color-text-tertiary)]">
                           {formatDate(note.updatedAt)}
                         </span>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={(e) => handleDelete(e, note._id)}
-                          className="rounded-lg p-1.5 text-[var(--color-text-tertiary)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors active:scale-90"
+                          className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors active:scale-90"
+                          title="Delete note"
+                          aria-label="Delete note"
                         >
                           <Trash2 size={13} />
                         </button>

@@ -1,6 +1,6 @@
-import { FileText, Calendar, Settings, User } from "lucide-react";
+import { FileText, Settings, User } from "lucide-react";
 
-type View = "notes" | "editor" | "search" | "settings" | "calendar" | "profile";
+type View = "notes" | "editor" | "search" | "settings" | "profile";
 
 interface MobileNavProps {
   view: View;
@@ -8,9 +8,8 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ view, onViewChange }: MobileNavProps) {
-  const items = [
+    const items = [
     { id: "notes" as View, label: "Notes", icon: FileText },
-    { id: "calendar" as View, label: "Calendar", icon: Calendar },
     { id: "settings" as View, label: "Settings", icon: Settings },
     { id: "profile" as View, label: "Profile", icon: User },
   ];

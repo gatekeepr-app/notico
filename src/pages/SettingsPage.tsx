@@ -90,9 +90,8 @@ export function SettingsPage() {
               ["Cmd/Ctrl + P", "Quick switcher"],
               ["Cmd/Ctrl + D", "Daily note"],
               ["Cmd/Ctrl + 1", "Notes view"],
-              ["Cmd/Ctrl + 2", "Calendar view"],
-              ["Cmd/Ctrl + 3", "Settings view"],
-              ["Cmd/Ctrl + 4", "Profile"],
+              ["Cmd/Ctrl + 2", "Settings view"],
+              ["Cmd/Ctrl + 3", "Profile"],
             ].map(([key, desc]) => (
               <div key={key} className="flex items-center justify-between rounded-lg px-3 py-1.5 bg-[var(--color-surface-subtle)]">
                 <span className="text-[var(--color-text-secondary)]">{desc}</span>

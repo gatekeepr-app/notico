@@ -1,5 +1,7 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 function generateCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -56,6 +58,27 @@ function generateToken(): string {
   return Array.from(array).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+async function createSession(ctx: MutationCtx, userId: Id<"users">, deviceName?: string) {
+  const sessions = await ctx.db
+    .query("sessions")
+    .withIndex("by_user", (q) => q.eq("userId", userId))
+    .collect();
+  for (const session of sessions) {
+    if (session.expiresAt < Date.now() || (deviceName && session.deviceName === deviceName)) {
+      await ctx.db.delete(session._id);
+    }
+  }
+  const token = generateToken();
+  await ctx.db.insert("sessions", {
+    userId,
+    token,
+    deviceName,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
+  });
+  return token;
+}
+
 export const claim = mutation({
   args: { code: v.string(), deviceName: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -69,14 +92,7 @@ export const claim = mutation({
 
     await ctx.db.delete(pairing._id);
 
-    const token = generateToken();
-    await ctx.db.insert("sessions", {
-      userId: pairing.userId,
-      token,
-      deviceName: args.deviceName,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
-    });
+    const token = await createSession(ctx, pairing.userId, args.deviceName);
 
     return { token };
   },

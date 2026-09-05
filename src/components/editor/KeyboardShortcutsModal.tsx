@@ -9,8 +9,8 @@ const GROUPS = [
       { keys: "Cmd/Ctrl + D", desc: "Daily note" },
       { keys: "Cmd/Ctrl + K", desc: "Keyboard shortcuts" },
       { keys: "Cmd/Ctrl + 1", desc: "Notes view" },
-      { keys: "Cmd/Ctrl + 2", desc: "Calendar view" },
-      { keys: "Cmd/Ctrl + 3", desc: "Settings view" },
+      { keys: "Cmd/Ctrl + 2", desc: "Settings view" },
+      { keys: "Cmd/Ctrl + 3", desc: "Profile" },
     ],
   },
   {
@@ -20,7 +20,7 @@ const GROUPS = [
       { keys: "Cmd/Ctrl + I", desc: "Italic" },
       { keys: "Cmd/Ctrl + Z", desc: "Undo" },
       { keys: "Cmd/Ctrl + Shift + Z", desc: "Redo" },
-      { keys: "/", desc: "Slash command menu" },
+      { keys: "Plain text", desc: "Write or paste" },
     ],
   },
   {

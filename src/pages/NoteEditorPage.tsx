@@ -2,7 +2,6 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { EditorPane } from "../components/editor/EditorPane";
 import { useState, useEffect, useCallback, useRef } from "react";
-import TurndownService from "turndown";
 import { marked } from "marked";
 import { useToast } from "../components/Toast";
 import { useAuth } from "../components/auth/AuthProvider";
@@ -11,26 +10,17 @@ import { queueNoteOp } from "../lib/offlineNotes";
 import type { NoteId } from "../types";
 import type { SaveState } from "../components/editor/SaveIndicator";
 
-const turndown = new TurndownService({
-  headingStyle: "atx",
-  codeBlockStyle: "fenced",
-  bulletListMarker: "-",
-});
-
 interface NoteEditorPageProps {
   noteId: NoteId;
   previewOpen: boolean;
   onTogglePreview: () => void;
-  onSelectNote: (id: NoteId) => void;
   onGoBack?: () => void;
 }
 
-export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectNote, onGoBack }: NoteEditorPageProps) {
+export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onGoBack }: NoteEditorPageProps) {
   const { token } = useAuth();
   const note = useQuery(api.notes.get, token ? { noteId, token } : "skip");
-  const allTags = useQuery(api.notes.getAllTags, token ? { token } : "skip") ?? [];
   const updateNote = useMutation(api.notes.update);
-  const createNote = useMutation(api.notes.create);
   const deleteNote = useMutation(api.notes.remove);
   const [title, setTitle] = useState("");
   const [mdx, setMdx] = useState("");
@@ -38,7 +28,6 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
   const [tags, setTags] = useState<string[]>([]);
   const [pinned, setPinned] = useState(false);
   const [published, setPublished] = useState(false);
-  const [richText, setRichText] = useState(true);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
@@ -107,27 +96,16 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
     saveTimer.current = setTimeout(() => save(newTitle, newMdx, newTags, newPinned, newPublished), 2000);
   }, [save]);
 
-  const handleHtmlChange = useCallback((newHtml: string) => {
-    setHtml(newHtml);
-    const newMdx = turndown.turndown(newHtml);
-    setMdx(newMdx);
-    scheduleSave(title, newMdx, tags, pinned, published);
-  }, [title, tags, pinned, published, scheduleSave]);
-
   const handleMdxChange = useCallback((newMdx: string) => {
     setMdx(newMdx);
+    renderMarkdown(newMdx);
     scheduleSave(title, newMdx, tags, pinned, published);
-  }, [title, tags, pinned, published, scheduleSave]);
+  }, [title, tags, pinned, published, renderMarkdown, scheduleSave]);
 
   const handleTitleChange = useCallback((newTitle: string) => {
     setTitle(newTitle);
     scheduleSave(newTitle, mdx, tags, pinned, published);
   }, [mdx, tags, pinned, published, scheduleSave]);
-
-  const handleTagsChange = useCallback((newTags: string[]) => {
-    setTags(newTags);
-    scheduleSave(title, mdx, newTags, pinned, published);
-  }, [title, mdx, pinned, published, scheduleSave]);
 
   const handleTogglePin = useCallback(() => {
     setPinned((prev) => {
@@ -136,49 +114,6 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
       return next;
     });
   }, [title, mdx, tags, published, scheduleSave]);
-
-  const handleTogglePublish = useCallback(() => {
-    setPublished((prev) => {
-      const next = !prev;
-      scheduleSave(title, mdx, tags, pinned, next);
-      return next;
-    });
-  }, [title, mdx, tags, pinned, scheduleSave]);
-
-  const handleToggleMode = useCallback(() => {
-    setRichText((prev) => {
-      if (prev) {
-        const newMdx = turndown.turndown(html);
-        setMdx(newMdx);
-      } else {
-        renderMarkdown(mdx);
-      }
-      return !prev;
-    });
-  }, [html, mdx, renderMarkdown]);
-
-  const handleCreateFromTemplate = useCallback(async (templateTitle: string, content: string) => {
-    if (!token) return;
-    if (!navigator.onLine) {
-      await queueNoteOp({ type: "create", title: templateTitle, content });
-      toast("Template note queued offline");
-      return;
-    }
-    const id = await createNote({ title: templateTitle, content, token });
-    onSelectNote(id);
-  }, [createNote, onSelectNote, toast, token]);
-
-  const handleImportFile = useCallback(async (content: string) => {
-    if (!token) return;
-    const lines = content.split("\n");
-    const firstLine = lines[0]?.replace(/^#\s*/, "").trim() || "Imported";
-    setTitle(firstLine);
-    setMdx(content);
-    renderMarkdown(content);
-    setSaveState("unsaved");
-    clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => save(firstLine, content, tags, pinned, published), 500);
-  }, [tags, pinned, published, save, token, renderMarkdown]);
 
   const handleCopy = useCallback(async () => {
     try {
@@ -200,11 +135,6 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
       toast("Unable to delete", "error");
     }
   }, [deleteNote, noteId, onGoBack, toast, token]);
-
-  const handleEdit = useCallback(() => {
-    if (!richText) renderMarkdown(mdx);
-    setRichText(true);
-  }, [mdx, renderMarkdown, richText]);
 
   useEffect(() => {
     return () => clearTimeout(saveTimer.current);
@@ -238,31 +168,18 @@ export function NoteEditorPage({ noteId, previewOpen, onTogglePreview, onSelectN
 
   return (
     <EditorPane
-      noteId={noteId}
       title={title}
       html={html}
       mdx={mdx}
-      tags={tags}
-      tagSuggestions={allTags.map((t) => t.name)}
       pinned={pinned}
-      published={published}
       previewOpen={previewOpen}
-      richText={richText}
       saveState={saveState}
       onTitleChange={handleTitleChange}
-      onHtmlChange={handleHtmlChange}
       onMdxChange={handleMdxChange}
-      onTagsChange={handleTagsChange}
       onTogglePin={handleTogglePin}
       onTogglePreview={onTogglePreview}
-      onToggleMode={handleToggleMode}
-      onTogglePublish={handleTogglePublish}
       onCopy={handleCopy}
-      onEdit={handleEdit}
       onDelete={handleDelete}
-      onSelectNote={onSelectNote}
-      onCreateFromTemplate={handleCreateFromTemplate}
-      onImportFile={handleImportFile}
     />
   );
 }
