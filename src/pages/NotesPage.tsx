@@ -219,9 +219,9 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
             {sorted.map((note: any) => {
               const isCopied = copiedId === note._id;
               return (
+                <div key={note._id} className="flex items-stretch gap-2">
                 <div
-                  key={note._id}
-                  className="group rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-3.5 transition-all active:scale-[0.98] cursor-pointer hover:border-[var(--color-border)] hover:shadow-sm"
+                  className="group flex-1 rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-3.5 transition-all active:scale-[0.98] cursor-pointer hover:border-[var(--color-border)] hover:shadow-sm"
                   onClick={() => onSelectNote(note._id)}
                 >
                   <div className="flex items-start gap-3">
@@ -255,22 +255,11 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
                         </div>
                       )}
                     </div>
-                    <div className="flex flex-col items-end gap-1.5 shrink-0">
-                      <span className="text-[10px] text-[var(--color-text-tertiary)]">
-                        {formatDate(note.updatedAt)}
-                      </span>
+                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+                        <span className="text-[10px] text-[var(--color-text-tertiary)]">
+                          {formatDate(note.updatedAt)}
+                        </span>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 sm:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => handleCopy(e, note)}
-                          className="rounded-lg p-1.5 transition-colors active:scale-90"
-                          style={{
-                            color: isCopied ? "#22c55e" : "var(--color-text-tertiary)",
-                            background: isCopied ? "#f0fdf4" : "transparent",
-                          }}
-                          title="Copy content"
-                        >
-                          {isCopied ? <Check size={13} /> : <Copy size={13} />}
-                        </button>
                         <button
                           onClick={(e) => handleDelete(e, note._id)}
                           className="rounded-lg p-1.5 text-[var(--color-text-tertiary)] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors active:scale-90"
@@ -280,6 +269,15 @@ export function NotesPage({ onSelectNote }: NotesPageProps) {
                       </div>
                     </div>
                   </div>
+                </div>
+                <button
+                  onClick={(e) => handleCopy(e, note)}
+                  className="flex w-12 shrink-0 items-center justify-center rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors active:scale-95 hover:border-[var(--color-border)] hover:bg-[var(--color-surface-subtle)]"
+                  title="Copy content"
+                  aria-label="Copy note content"
+                >
+                  {isCopied ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
+                </button>
                 </div>
               );
             })}

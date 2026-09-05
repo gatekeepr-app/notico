@@ -37,6 +37,7 @@
 
 html {
   font-family: var(--font-sans);
+  font-size: 17px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   viewport-fit: cover;
@@ -88,7 +89,7 @@ body {
 
 .cm-editor .cm-scroller {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
 }
 
